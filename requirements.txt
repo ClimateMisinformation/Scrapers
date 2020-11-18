@@ -1,0 +1,4 @@
+pandas
+selenium
+BeautifulSoup
+html2text
