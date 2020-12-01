@@ -34,7 +34,35 @@ for csv_file_path in glob.glob(os.path.join(data_source_path, '*.csv')):
 
 merged_data = pandas.concat(data_sources, ignore_index = True)
 
-merge_data.to_csv(output_file_path)
+merged_data.to_csv(output_file_path, index = False)
+
+
+"""
+test:
+
+import subprocess
+
+
+f = open('test/a.csv', 'w')
+f.write('url,author,title,text,date,tags\na,b,c,d,e,f')
+f.close()
+
+f = open('test/0.csv', 'w')
+f.write('url,author,title,text,date,tags\n0,1,2,3,4,5')
+f.close()
+
+r=subprocess.call(['python', 'data-merger.py', 'test', 'test-articles.csv'])
+
+assert(r==0)
+
+f = open('test-articles.csv', 'r')
+c = f.read()
+f.close()
+
+assert(c == 'url,author,title,text,date,tags\na,b,c,d,e,f\n0,1,2,3,4,5\n')
+
+"""
+
 
 
 
