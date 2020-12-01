@@ -5,6 +5,11 @@ Web scrapers
 
 List:
 - The BFD
-- CO2 Coalition
+- Carbon Sense
 - Cato Institute
+- Clexit
+- CO2 Coalition
+- FOS
+- No tricks
+- WUWT
 
