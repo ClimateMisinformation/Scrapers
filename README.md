@@ -2,7 +2,7 @@
 
 Web scrapers.
 
-Put your scrapped data in the data directory. Once everything has been scrapped run the `data-merger.py` script to merger all the data into one file (normally done only once).
+Put your scrapped data in the data directory. Once everything has been scrapped run the `data-merger.py` script to merge all the data into one file (normally done only once).
 
 Run data-merger
 
