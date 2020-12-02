@@ -310,7 +310,17 @@ save_data(data_file_path, articles)
 
 
 
+# some stats
 
+articles = pandas.read_csv(data_file_path)
+
+climate_phrases = [ 'climate', 'global warming', 'carbon dioxyde', 'renewable', 'CO2', 'coal', 'carbon', 'rising temperatures', ]
+
+article_mention_counts = { phrase : sum(articles.text.str.lower().str.find(phrase) > 0) for phrase in climate_phrases }
+
+print('Mention counts:')
+for p, c in article_mention_counts.items():
+  print(f'{p} : {c}')
 
 
 
