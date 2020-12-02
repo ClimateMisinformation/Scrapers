@@ -19,7 +19,7 @@ for l in section:
     # get all month and year linked urls
     urls.append(l['href'])
 
-print ("Found URLS:", len(urls))
+print ("Found urls:", len(urls))
 
 post_urls = []
 for url in tqdm(urls):
@@ -32,7 +32,7 @@ for url in tqdm(urls):
 
 print ("Found posts:", len(post_urls))
 
-post_url, post_title, post_desc, post_cat = [], [], [], []
+post_url, post_authors, post_title, post_desc, post_cat = [], [], [], [], []
 for url in tqdm(post_urls):
     # get url of the post
     post_url.append(url)
@@ -41,17 +41,23 @@ for url in tqdm(post_urls):
     soup = BeautifulSoup(page.text, 'lxml')
     # get category of post if any
     p_class = soup.find("p", {"class" : 'postmetadata'})
+    cls = []
     for c in p_class.find_all('a'):
-        post_cat.append(c.text)
+        cls.append(c.text)
+    post_cat.append(cls)
     # get the title of post
     story = soup.find('div', {'class': 'storycontent'})
     entry_title = story.find('a')
     post_title.append(entry_title.text.strip())
+    # get the description of post
     desc = soup.find('div', {'class': 'storybody'})
     post_desc.append(desc.text)
 
-print (len(post_url), len(post_title), len(post_desc), len(post_cat))
+# difficult to extract exact authors they are usually on 1st line of description
+post_authors = [""]*len(post_url)
 
 # save all scraping to csv
-df = pd.DataFrame(zip(post_url, post_title, post_desc, post_cat), columns=["URL", "Title", "Description", "Category"])
+df = pd.DataFrame(zip(post_url, post_authors, post_title, post_desc, post_cat), columns=["url", "author", "title", "text", "tags"])
+# add date
+df['date'] = df['url'].apply(lambda x : "/".join(x.split("/")[3:6]))
 df.to_csv("carbon_sense.csv", index=False)

@@ -22,7 +22,7 @@ for l in section.findAll('li'):
     # get all month and year linked urls
     urls.append(l.a.get('href'))
 
-print ("Found URLS:", len(urls))
+print ("Found urls:", len(urls))
 
 start = time.time()
 post_urls = []
@@ -36,7 +36,7 @@ for url in urls:
         if a['href'] not in urls:
             urls.append(a['href'])
 
-print ("New URLS after counting pagination:", len(urls))
+print ("New urls after counting pagination:", len(urls))
 print ("Time taken: {:.2f} sec".format(time.time()-start))
 
 for url in tqdm(urls):
@@ -49,7 +49,7 @@ for url in tqdm(urls):
 
 print ("Found posts:", len(post_urls))
 
-post_url, post_title, post_desc, post_cat = [], [], [], []
+post_url, post_authors, post_title, post_desc, post_cat = [], [], [], [], []
 for url in tqdm(post_urls):
     # get url of the post
     post_url.append(url)
@@ -68,9 +68,15 @@ for url in tqdm(post_urls):
     post_title.append(entry_title.text.strip())
     desc = soup.find('div', {'class': 'entry-content'})
     post_desc.append(desc.text)
-
-print (len(post_url), len(post_title), len(post_desc), len(post_cat))
+    # get author of the post
+    author = soup.find('a', {'class': 'url fn n'})
+    try:
+        post_authors.append(author.text)
+    except AttributeError:
+        post_authors.append("")
 
 # save all scraping to csv
-df = pd.DataFrame(zip(post_url, post_title, post_desc, post_cat), columns=["URL", "Title", "Description", "Category"])
+df = pd.DataFrame(zip(post_url, post_authors, post_title, post_desc, post_cat), columns=["url", "author", "title", "text", "tags"])
+# add date
+df['date'] = df['url'].apply(lambda x : "/".join(x.split("/")[3:6]))
 df.to_csv("no_tricks.csv", index=False)

@@ -8,7 +8,7 @@ import re
 """
 Scraping for site: https://wattsupwiththat.com/
 Total number of pages with links: 170
-Total number of posts in all pages: 1692
+Total number of posts in all pages: 1700
 """
 
 site = "https://wattsupwiththat.com/"
@@ -24,7 +24,7 @@ for l in section.find_all('option'):
 
 #remove urls with empty value
 urls.remove("")
-print ("Found URLS:", len(urls))
+print ("Found urls:", len(urls))
 
 post_urls = []
 for url in tqdm(urls):
@@ -37,9 +37,8 @@ for url in tqdm(urls):
 
 print ("Found posts:", len(post_urls))
 
-post_url, post_title, post_desc, post_cat = [], [], [], []
+post_url, post_authors, post_title, post_desc, post_cat = [], [], [], [], []
 for url in tqdm(post_urls):
-    url = "https://wattsupwiththat.com/2020/12/01/chinese-lunar-landing-mission-challenges-us-space-supremacy/"
     # get url of the post
     post_url.append(url)
     # get the required post
@@ -50,18 +49,22 @@ for url in tqdm(post_urls):
     cls = []
     for c in entry_class['class']:
         if 'category' in c:
-            cls.append(c)
+            cls.append(c.replace("category-", ""))
         if 'tag' in c:
-            cls.append(c)
+            cls.append(c.replace("tag-", ""))
     post_cat.append(cls)
     # get the title of post
     entry_title = soup.find('h1', {'class': 'entry-title'})
     post_title.append(entry_title.text.strip())
+    # get description of post
     desc = soup.find('div', {'class': 'entry-content'})
     post_desc.append(desc.text)
-
-print (len(post_url), len(post_title), len(post_desc), len(post_cat))
+    # get author of post
+    author = soup.find('a', {'class': 'author'})
+    post_authors.append(author.text)
 
 # save all scraping to csv
-df = pd.DataFrame(zip(post_url, post_title, post_desc, post_cat), columns=["URL", "Title", "Description", "Category"])
+df = pd.DataFrame(zip(post_url, post_authors, post_title, post_desc, post_cat), columns=["url", "author", "title", "text", "tags"])
+# add date
+df['date'] = df['url'].apply(lambda x : "/".join(x.split("/")[3:6]))
 df.to_csv("wuwt.csv", index=False)
