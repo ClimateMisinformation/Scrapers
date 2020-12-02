@@ -7,8 +7,8 @@ import re
 
 """
 Scraping for site: https://notrickszone.com/
-Total number of pages with links : 417
-Total number of posts in all pages: 4321
+Total number of pages with links : 418
+Total number of posts in all pages: 4323
 """
 
 site = "https://notrickszone.com/"
@@ -31,10 +31,14 @@ for url in urls:
     page = requests.get(url)
     soup = BeautifulSoup(page.text, 'lxml')
     pagination = soup.find('div', {'class' : 'navigation-links'})
-    pages = pagination.findAll('a')
-    for a in pages:
-        if a['href'] not in urls:
-            urls.append(a['href'])
+    # check if next page exists or not
+    try:
+        pages = pagination.findAll('a')
+        for a in pages:
+            if a['href'] not in urls:
+                urls.append(a['href'])
+    except AttributeError:
+        continue    
 
 print ("New urls after counting pagination:", len(urls))
 print ("Time taken: {:.2f} sec".format(time.time()-start))
@@ -70,6 +74,7 @@ for url in tqdm(post_urls):
     post_desc.append(desc.text)
     # get author of the post
     author = soup.find('a', {'class': 'url fn n'})
+    # check if author exists or not
     try:
         post_authors.append(author.text)
     except AttributeError:
