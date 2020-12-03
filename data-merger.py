@@ -44,11 +44,11 @@ import subprocess
 
 
 f = open('test/a.csv', 'w')
-f.write('url,author,title,text,date,tags\na,b,c,d,e,f')
+f.write('url,source,title,author,date,tags,text\na,b,c,d,e,f,g')
 f.close()
 
 f = open('test/0.csv', 'w')
-f.write('url,author,title,text,date,tags\n0,1,2,3,4,5')
+f.write('url,source,title,author,date,tags,text\n0,1,2,3,4,5,6')
 f.close()
 
 r=subprocess.call(['python', 'data-merger.py', 'test', 'test-articles.csv'])
@@ -59,7 +59,7 @@ f = open('test-articles.csv', 'r')
 c = f.read()
 f.close()
 
-assert(c == 'url,author,title,text,date,tags\na,b,c,d,e,f\n0,1,2,3,4,5\n')
+assert(c == 'url,source,title,author,date,tags,text\na,b,c,d,e,f,g\n0,1,2,3,4,5,6\n')
 
 """
 

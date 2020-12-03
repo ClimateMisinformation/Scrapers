@@ -1,2 +1,2 @@
-url,author,title,text,date,tags
-"source URL","author of the article","title of the article","content of the article in text form","date of the article (as given by the source), suggested format: YYYY-MM-DD","category/ies of the article as given by the source"
+url,source,title,author,date,tags,text
+"source URL","name of the source organisation","title of the article","author of the article","date of the article (as given by the source), suggested format: YYYY-MM-DD","category/ies of the article as given by the source","content of the article in text form"
