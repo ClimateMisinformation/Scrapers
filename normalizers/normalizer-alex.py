@@ -9,6 +9,7 @@ sources = {
 'cato-institute' : {
  'details_csv' : 'pages.csv',
  'url' : 'link',
+ 'source' : 'Cato Institute',
  'author' : 'author',
  'title' : 'title',
  'date' : 'date_time_string',
@@ -21,6 +22,7 @@ sources = {
 'co2-coalition' : {
  'details_csv' : 'co2-coalition.csv',
  'url' : None,
+ 'source' : 'CO2 Coalition',
  'author' : None,
  'title' : 'title',
  'date' : None,
@@ -33,6 +35,7 @@ sources = {
 'the-bfd' : {
  'details_csv' : 'pages.csv',
  'url' : 'url',
+ 'source' : 'The BFD',
  'author' : 'author',
  'title' : 'title',
  'date' : 'date_time',
@@ -148,6 +151,7 @@ for source_name, source_info in sources.items():
       meta_data[column] = ''
   text_dir_path = os.path.join(source_data_path, source_info['text_dir'])
   meta_data['text'] = meta_data[source_info['text_file']].apply(lambda r : load_text(text_dir_path, r))
+  meta_data['source'] = source_info['source']
   normalized_data = meta_data[meta_data.text.str.len() > 0][column_names]
   if(source_name == 'the-bfd'):
     normalized_data['tags'] = normalized_data['tags'].apply(lambda t : ', '.join(eval(t)))
@@ -155,7 +159,7 @@ for source_name, source_info in sources.items():
     normalized_data['date'] = normalized_data['date'].apply(lambda d : convert_date(d, source_info['original_date_formats']))
   if(source_name == 'co2-coalition'):
     normalized_data['url'] = 'https://co2coalition.org/frequently-asked-questions/'
-    normalized_data['author'] = 'Co2 Coalition'
+    normalized_data['author'] = ''
     normalized_data['date'] = '2020-10-22' # scraping date
   output_file_path = os.path.join(data_path, source_name + '.csv')
   normalized_data.to_csv(output_file_path, index = False)
