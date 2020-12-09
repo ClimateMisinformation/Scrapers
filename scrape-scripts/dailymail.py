@@ -5,7 +5,8 @@ import time
 from tqdm import tqdm
 import pandas
 import html2text
-
+import datetime
+import sys
 """
 Scraping for site: https://www.dailymail.co.uk/textbased/channel-1/index.html
 General news from the text  only Daily  Mail website
@@ -48,24 +49,30 @@ articles = {
 }
 
 for url in tqdm(urls):
-  response = requests.get(url)
-  page_soup = BeautifulSoup(response.text, 'html.parser')
-  content_soup = page_soup.find('div', 'article')
-  title = clean_text(content_soup.find('h1').text)
-  author = clean_text(content_soup.find('p', 'author-section byline-plain').text)
-  date = page_soup.body.div.span.text
-  tags = 'WHATISTHERIGHTTAG'
-  text = content_soup.text
-  articles['url'].append(url)
-  articles['title'].append(title)
-  articles['author'].append(author)
-  articles['date'].append(date)
-  articles['tags'].append(tags)
-  articles['text'].append(text)
+    try:
+        response = requests.get(url)
+        page_soup = BeautifulSoup(response.text, 'html.parser')
+        content_soup = page_soup.find('div', 'article')
+        title = clean_text(content_soup.find('h1').text)
+        author = clean_text(content_soup.find('p', 'author-section byline-plain').text)
+        datestring = page_soup.body.div.span.text
+        dateobject = datetime.datetime.strptime(datestring, '%A, %B %d %Y')
+        date = dateobject.date()
+        tags = 'Neutral'
+        text = clean_text(content_soup.text)
+        articles['url'].append(url)
+        articles['title'].append(title)
+        articles['author'].append(author)
+        articles['date'].append(date)
+        articles['tags'].append(tags)
+        articles['text'].append(text)
+    except Exception:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
 
 
 
-pandas.DataFrame(articles).to_csv('../data/dailymail.csv', index = False)
+pandas.DataFrame(articles).to_csv('data/dailymail.csv', index = False)
 
 
 print ("New urls after counting pagination:", len(urls))
