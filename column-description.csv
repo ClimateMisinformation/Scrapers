@@ -1,2 +1,2 @@
 url,source,title,author,date,tags,text
-"source URL","name of the source organisation","title of the article","author of the article","date of the article (as given by the source), suggested format: YYYY-MM-DD","category/ies of the article as given by the source","content of the article in text form"
+"source URL","name of the source organisation","title of the article","author of the article","date of the article (as given by the source), keep time if possible, suggested format: maybe use directly python datetime format,"category/ies of the article as given by the source","content of the article in text form"
