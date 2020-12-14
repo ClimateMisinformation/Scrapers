@@ -10,4 +10,4 @@ This Python script:
 - saves those csvs in doccano_data 
 
 
-**ISSUE** due to the shuffling everytime we run the script the output csvs will be different so bE CAREFUL
+**ISSUE** I added a seed to the shuffling to make the sure the csvs stay the same every time we run the script. Dont add more data to main data folder 
