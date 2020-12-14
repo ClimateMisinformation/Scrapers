@@ -22,15 +22,12 @@ for file in files_and_directories:
 
 final_df = pd.concat(all_dfs)
 
-print(final_df)
 
-
-
-final_df=final_df.sample(frac=1)
+final_df=final_df.sample(frac=1, random_state=1)
 final_df = final_df[['text']]
 
 final_df.to_csv("doccano_data.csv")
-
+print(final_df.head())
 
 NUMBER_OF_SPLITS = int(round(final_df.shape[0] / 100, 0))
 print(NUMBER_OF_SPLITS)
