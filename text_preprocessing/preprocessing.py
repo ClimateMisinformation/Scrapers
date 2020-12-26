@@ -9,11 +9,16 @@ import emoji
 stemmer = SnowballStemmer("english")
 lemmatizer = WordNetLemmatizer()
 
+from sklearn import preprocessing
+le = preprocessing.LabelEncoder()
+
+
 stop_words = set(stopwords.words('english'))
 punctuation = string.punctuation.replace("-", "")
 punctuation = punctuation.replace("!", "")
 punctuation = punctuation.replace("?", "")
 punctuation = punctuation.replace(".", "")
+
 
 print(punctuation)
 
@@ -28,6 +33,27 @@ def na_values(df):
     return df
 
 
+def class_encoding(df):
+    valid_classes = [118,119,120]
+
+    df = df[df['label'].isin(valid_classes)]
+
+    multi_class_values = df['label'].tolist()
+
+    le.fit(multi_class_values)
+    encoded_classes = le.transform(multi_class_values)
+
+    unique_classes = le.classes_
+
+    for x in unique_classes:
+        print(str(x) + " is encoded to " + str(le.transform([x])))
+
+    df_encoded = df.drop('label', axis=1)
+
+    df_encoded['labels'] = encoded_classes
+
+    return df_encoded
+
 # Exploring len of articles
 def article_len_exploration(list_of_texts, new_df):
     text_lens = []
@@ -36,6 +62,9 @@ def article_len_exploration(list_of_texts, new_df):
         text_lens.append(len(text.split()))
 
     new_df['text_lens'] = text_lens
+
+    #TODO: do this for before and after dropping long articles
+    new_df = new_df[new_df['text_lens'] < 1500]
     print('Article length distributon')
     print(new_df['text_lens'].describe())
 
@@ -125,12 +154,10 @@ def advanced_text_cleaning(clean_article):
     return clean_splitted_text_no_stopw
 
 
-df = pd.read_csv('../format_data_for_doccano/doccano_data/doccano_data0.csv', names=['text', 'labels'])
+'''df = pd.read_csv('../format_data_for_doccano/doccano_data/doccano_data0.csv', names=['text', 'labels'])
 
 print('Dataframe imported')
-print('Size of dataframe')
-print(df.columns)
-print(df.shape)
+
 
 print(df.head())
 
@@ -147,3 +174,4 @@ df['clean_text'] = clean_text
 print(df.head())
 
 df.to_csv('preprocessed_data_test.csv')
+'''

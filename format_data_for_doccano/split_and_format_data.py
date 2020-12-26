@@ -29,7 +29,7 @@ final_df = final_df[['text']]
 final_df.to_csv("doccano_data.csv")
 print(final_df.head())
 
-NUMBER_OF_SPLITS = int(round(final_df.shape[0] / 100, 0))
+NUMBER_OF_SPLITS = int(round(final_df.shape[0] / 50, 0))
 print(NUMBER_OF_SPLITS)
 
 fileOpens = [open(f"doccano_data/doccano_data{i}.csv","w") for i in range(NUMBER_OF_SPLITS)]
