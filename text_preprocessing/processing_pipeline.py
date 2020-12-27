@@ -1,49 +1,59 @@
 from preprocessing import *
-from word2vec import *
+from embeddings import *
 
-#TODO: create import function
+############################## PREPROCESSING #################################
 
-df = pd.read_csv('../labelled_data/labelled_data.csv', header = 0)
+def preprocessing_pipeline(path, embedding_technique):
 
-df.drop(df.columns.difference(['text','label']), 1, inplace=True)
+    print("Importing data...")
+    df = import_data(path)
 
-print(df.head())
+    print("Dropping na values..")
+    df = na_values(df)
 
-print('Size of dataframe')
-print(df.columns)
-print(df.shape)
+    print("Encoding classes..")
+    df = class_encoding(df)
 
-df = na_values(df)
+    print("Exploring length of articles..")
+    article_len_exploration(df)
 
-print(df.shape)
+    print("Starting text preprocessing..")
+    clean_text = preprocessing(df)
 
-df = class_encoding(df)
+    df['clean_text'] = clean_text
 
-list_of_texts = df['text'].tolist()
+    print(df.head())
 
-article_len_exploration(list_of_texts, df)
+    embedded_df = embedding(embedding_technique)
 
-clean_text = preprocessing(list_of_texts)
+    return embedded_df
 
-df['clean_text'] = clean_text
+############################## EMBEDDING #################################
 
-print(df.head())
+def embedding(embedding_technique):
 
-docs = clean_text
+    if embedding_technique == 'word2vec':
 
-print("Number of articles",len(docs))
+        print("Initialising Word2Vec vectorization")
+        embedded_df = word2vec_vectorizer(df)
+        embedded_df.to_csv('word2vectest.csv')
 
-list_of_dicts, list_of_lists, words_not_found_list = get_vectors(docs)
-list_of_averages = average_vectors(list_of_lists)
+    elif embedding_technique == 'tfidf':
 
-print(len(list_of_averages))
-print(len(list_of_averages[0]))
+        print("Initialising tf-idf vectorization")
+        embedded_df = tf_idf_vectorizer(df)
+        embedded_df.to_csv('tfidftest.csv')
 
-averages_df = pd.DataFrame(list_of_averages)
+    else:
+        print("ERROR. Please select one of the possible embedding techniques: word2vec, tfidf")
 
-print(averages_df.head())
-print(averages_df.shape)
 
-averages_df['classes']=df['labels'].to_list()
+    return embedded_df
 
-averages_df.to_csv('word2vectest.csv')
+############################## MAIN #################################
+
+
+path = '../labelled_data/labelled_data.csv'
+embedding_technique = 'tfidf'
+
+preprocessing_pipeline(path, embedding_technique)
