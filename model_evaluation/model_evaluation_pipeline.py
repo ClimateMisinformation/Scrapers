@@ -5,7 +5,7 @@ def import_data(embedding):
 
     try:
 
-        data = pd.read_csv(embedding + "test.csv", index_col=0)
+        data = pd.read_csv("embedding_data/" + embedding + "test.csv", index_col=0)
         print("Data loaded ", embedding)
         print("Dataset shape ", data.shape)
     except:
