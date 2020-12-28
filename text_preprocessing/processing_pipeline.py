@@ -36,13 +36,13 @@ def embedding(embedding_technique):
 
         print("Initialising Word2Vec vectorization")
         embedded_df = word2vec_vectorizer(df)
-        embedded_df.to_csv('word2vectest.csv')
+        embedded_df.to_csv('../model_evaluation/embedding_data/word2vectest.csv')
 
     elif embedding_technique == 'tfidf':
 
         print("Initialising tf-idf vectorization")
         embedded_df = tf_idf_vectorizer(df)
-        embedded_df.to_csv('tfidftest.csv')
+        embedded_df.to_csv('../model_evaluation/embedding_data/tfidftest.csv')
 
     else:
         print("ERROR. Please select one of the possible embedding techniques: word2vec, tfidf")
@@ -57,3 +57,5 @@ path = '../labelled_data/labelled_data.csv'
 embedding_technique = 'tfidf'
 
 preprocessing_pipeline(path, embedding_technique)
+
+#TODO: change here the name of final output and check if path works
