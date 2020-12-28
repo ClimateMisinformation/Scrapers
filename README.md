@@ -32,8 +32,16 @@ Description of directories
    
 ## text_preprocessing 
 
-  Initial script for basic text pre-processing. Still wip. 
+  Implementation of text cleaning and document embedding 
+  
+  The document embedding techniques implemented: 
+  
+  - word2vec + average
+  - tfidf
 
+## model_evaluation 
+
+  Evaluation of models and document embedding techniques
 
 
 
