@@ -3,6 +3,7 @@ import re
 import requests
 import html2text
 import pandas
+import tempfile
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
@@ -24,10 +25,9 @@ search_urls = {
 }
 
 driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
-tmp_dir = 'tmp/bbc-non-climate'
+tmp_dir = ''
 url_list_file_name = 'urls.csv'
 base_url = 'https://www.bbc.co.uk'
-url_list_path = os.path.join(tmp_dir, url_list_file_name)
 data_file_path = os.path.join('data', 'bbc-non-climate.csv')
 firefox_bin_path = '/usr/bin/firefox'
 geckodriver_path = '/usr/bin/geckodriver'
@@ -39,7 +39,6 @@ urls = []
 page_index = 0
 article_count = 0
 start_index = 1530
-
 
 """
 SEARCH PAGES
@@ -111,6 +110,12 @@ def check_if_url_must_be_skipped(url):
         return True
     return False
 
+
+""" If it does not exist create a tmp dir  to save the result in"""
+tmp_dir = tempfile.TemporaryDirectory().name
+print('The new temporary directory is %s' % tmp_dir)
+url_list_path = os.path.join(tmp_dir, url_list_file_name)
+print('The URL path  is %s' % url_list_path)
 
 " For each search URL invoke selenium navigate the menu and save the linked to URLS "
 for topic, search_url in search_urls.items():
