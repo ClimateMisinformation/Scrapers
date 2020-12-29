@@ -83,37 +83,36 @@ def clean_text(text_cleaned):
     return re.sub(' $', '', re.sub('^ ', '', re.sub(' +', ' ', text_cleaned.replace('\n', ' '))))
 
 
-def check_if_url_must_be_skipped(url):
-    if url[:len(base_url)] != base_url:
+def check_if_url_must_be_skipped(url_to_check):
+    if url_to_check[:len(base_url)] != base_url:
         print('Article is outside BBC news')
         return True
-    if url[:32] == 'https://www.bbc.co.uk/newsround/':
+    if url_to_check[:32] == 'https://www.bbc.co.uk/newsround/':
         print('Newsround article')
         return True
-    if url[:33] == 'https://www.bbc.co.uk/programmes/':
+    if url_to_check[:33] == 'https://www.bbc.co.uk/programmes/':
         print('Programmes article')
         return True
-    if url[:37] == 'https://www.bbc.co.uk/news/resources/':
+    if url_to_check[:37] == 'https://www.bbc.co.uk/news/resources/':
         print('Resources article')
         return True
-    if url[:32] == 'https://www.bbc.co.uk/news/live/':
+    if url_to_check[:32] == 'https://www.bbc.co.uk/news/live/':
         print('Live article')
         return True
-    if url[:28] == 'https://www.bbc.co.uk/sport/':
+    if url_to_check[:28] == 'https://www.bbc.co.uk/sport/':
         print('Sport article')
         return True
-    if url == 'https://www.bbc.co.uk/news/scotland':
+    if url_to_check == 'https://www.bbc.co.uk/news/scotland':
         print('Page not an article')
         return True
-    if url.find('?') > 0:
+    if url_to_check.find('?') > 0:
         print('Has ? in url')
         return True
     return False
 
 
 """ If it does not exist create a tmp dir  to save the result in"""
-tmp_dir = tempfile.TemporaryDirectory().name
-print('The new temporary directory is %s' % tmp_dir)
+tmp_dir = tempfile.mkdtemp()
 url_list_path = os.path.join(tmp_dir, url_list_file_name)
 print('The URL path  is %s' % url_list_path)
 
