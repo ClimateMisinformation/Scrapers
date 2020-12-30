@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import re
 import requests
@@ -6,11 +18,18 @@ import pandas
 import tempfile
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.common.exceptions import NoSuchElementException as slnm_NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException as slnm_StaleElementReferenceException
+from selenium.common.exceptions import WebDriverException as slnm_TimeoutException
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support.wait import WebDriverWait
+
+
+
 
 search_urls = {
     'food': r'https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food',
@@ -25,6 +44,7 @@ search_urls = {
 }
 
 driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+wait = WebDriverWait(driver, 10)
 tmp_dir = ''
 url_list_file_name = 'urls.csv'
 base_url = 'https://www.bbc.co.uk'
@@ -39,6 +59,7 @@ urls = []
 page_index = 0
 article_count = 0
 start_index = 1530
+
 
 """
 SEARCH PAGES
@@ -87,40 +108,60 @@ def check_if_url_must_be_skipped(url_to_check):
     if url_to_check[:len(base_url)] != base_url:
         print('Article is outside BBC news')
         return True
-    if url_to_check[:32] == 'https://www.bbc.co.uk/newsround/':
+    elif url_to_check[:32] == 'https://www.bbc.co.uk/newsround/':
         print('Newsround article')
         return True
-    if url_to_check[:33] == 'https://www.bbc.co.uk/programmes/':
+    elif url_to_check[:33] == 'https://www.bbc.co.uk/programmes/':
         print('Programmes article')
         return True
-    if url_to_check[:37] == 'https://www.bbc.co.uk/news/resources/':
+    elif url_to_check[:37] == 'https://www.bbc.co.uk/news/resources/':
         print('Resources article')
         return True
-    if url_to_check[:32] == 'https://www.bbc.co.uk/news/live/':
+    elif url_to_check[:32] == 'https://www.bbc.co.uk/news/live/':
         print('Live article')
         return True
-    if url_to_check[:28] == 'https://www.bbc.co.uk/sport/':
+    elif url_to_check[:28] == 'https://www.bbc.co.uk/sport/':
         print('Sport article')
         return True
-    if url_to_check == 'https://www.bbc.co.uk/news/scotland':
+    elif url_to_check == 'https://www.bbc.co.uk/news/scotland':
         print('Page not an article')
         return True
-    if url_to_check.find('?') > 0:
+    elif url_to_check.find('?') > 0:
         print('Has ? in url')
         return True
-    return False
+    else:
+        return False
 
 
-""" If it does not exist create a tmp dir  to save the result in"""
+""" Create a tmp dir  to save the result in"""
 tmp_dir = tempfile.mkdtemp()
 url_list_path = os.path.join(tmp_dir, url_list_file_name)
 print('The URL path  is %s' % url_list_path)
 
 " For each search URL invoke selenium navigate the menu and save the linked to URLS "
 for topic, search_url in search_urls.items():
-    # load first page
-    driver.get(search_url)
-    # get page count
+    """ Load the  search URL 
+        Configure  selenium to accept cookies for the session 
+        Count the number  of pages in the topic    
+    """
+    try:
+        driver.get(search_url)
+    except slnm_TimeoutException:
+        continue
+    try:
+        element = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "bbccookies-continue-button"))
+        )
+        element = driver.find_element_by_id("bbccookies-continue-button").click()
+    except slnm_NoSuchElementException:
+        continue
+    except Exception as e:
+        print(e)
+
+    """ Get page count from the pagination menu and  output it to  CLI
+        Extract the URI of  articles from the  navigation menu         
+        
+    """
     nb_pages = int(driver.find_element_by_class_name('qa-pagination-total-page-number').text)
     print(f'Topic "{topic}" has {nb_pages} result pages')
     # for each page
@@ -144,7 +185,7 @@ for topic, search_url in search_urls.items():
             try:
                 driver.find_element_by_class_name('qa-pagination-next-page').click()
             except slnm_NoSuchElementException:
-                # BBC got tired?
+                # BBC failed to respond
                 break
     print(f'Actual number of pages: {page_index + 1}')
 
@@ -161,15 +202,15 @@ url_df.to_csv(url_list_path, index=False)
 
 
 """
-ARTICLE PAGES:
-inside <article>
-inside <header>
-title: h1 #main-heading 
-author: just after the h1: p > span[1] > a text
-date: just after the p: div > dd > span > span[1] > time (attr=) datetime="2020-11-23T22:24:21.000Z"
-tags: just after the div: div > div[1] > div > ul > li[*] > a text
-</header>
-content: div[*] with attr: data-component="text-block" > p text
+FORMAT  OF BBC ARTICLE PAGES:
+  inside <article>
+    inside <header>
+      title: h1 #main-heading 
+      author: just after the h1: p > span[1] > a text
+      date: just after the p: div > dd > span > span[1] > time (attr=) datetime="2020-11-23T22:24:21.000Z"
+      tags: just after the div: div > div[1] > div > ul > li[*] > a text
+    end </header>
+    content: div[*] with attr: data-component="text-block" > p text
 """
 
 html_to_text_converter = html2text.HTML2Text()
@@ -227,7 +268,7 @@ for url_index, url in enumerate(article_urls.url):
     # check
     nb_ul = len(header_soup.find_all('ul'))
     if nb_ul > 1:
-        raise Exception(f'{url_index} : {url} more than one ul in header')
+        raise Exception(f'{url_index} : {url} morArticle is outside BBC newse than one ul in header')
     try:
         tag_list = [s.find('a').text for s in header_soup.find_all('li')]
     except AttributeError:
@@ -270,6 +311,10 @@ article_mention_counts = {phrase: sum(articles.text.str.lower().str.find(phrase)
 print('Mention counts:')
 for p, c in article_mention_counts.items():
     print(f'{p} : {c}')
+
+""" Quit Selenium driver """
+driver.quit()
+
 
 """
 # after: check articles containing the following (but KEEP them if not climate change related)
