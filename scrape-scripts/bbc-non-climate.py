@@ -36,11 +36,11 @@ def set_firefox_options() -> Options:
         Firefox options for headless browser is enabled.
 
     """
-    firefox_options = Options()
-    firefox_options.add_argument("--headless")
-    firefox_options.add_argument("--no-sandbox")
-    firefox_options.add_argument("--disable-dev-shm-usage")
-    return firefox_options
+    firefox_opts = Options()
+    firefox_opts.add_argument("--headless")
+    firefox_opts.add_argument("--no-sandbox")
+    firefox_opts.add_argument("--disable-dev-shm-usage")
+    return firefox_opts
 
 
 def save_urls(urls_save):
@@ -94,18 +94,11 @@ if __name__ == "__main__":
 
     search_urls = {
         'food': r'https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food',
-        'europe-migrant-crisis': r'https://www.bbc.co.uk/news/topics/cnx753je2q4t/europe-migrant-crisis',
-        'eu-uk-post-brexit-trade-talks': r'https://www.bbc.co.uk/news/topics/c4vm89lx8e8t/eu-uk-post-brexit-trade-talks',
-        'hong-kong-anti-government-protests': r'https://www.bbc.co.uk/news/topics/c95yz8vxvy8t/hong-kong-anti-government-protests',
-        'tigray-crisis': r'https://www.bbc.co.uk/news/topics/cr2pnx1173dt/tigray-crisis',
-        'facebook': r'https://www.bbc.co.uk/news/topics/cmj34zmwxjlt/facebook',
-        'puerto-rico': r'https://www.bbc.co.uk/news/topics/cg41ylwvw3gt/puerto-rico',
-        'coronavirus': r'https://www.bbc.co.uk/news/coronavirus',
 
     }
 
     firefox_options = set_firefox_options()
-    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=firefox_options)
+    driver = webdriver.Firefox(options=firefox_options)
     wait = WebDriverWait(driver, 10)
     tmp_dir = ''
     url_list_file_name = 'urls.csv'
@@ -126,29 +119,28 @@ if __name__ == "__main__":
     FORMAT  OF SEARCHED PAGES
     
     List of articles:
-    <ol class="gs-u-m0 gs-u-p0 lx-stream__feed qa-stream"
-    <li class="lx-stream__post-container placeholder-animation-finished">
+      <ol class="gs-u-m0 gs-u-p0 lx-stream__feed qa-stream"
+      <li class="lx-stream__post-container placeholder-animation-finished">
     
-    some li are just a video (no lihk)
+    Some <li> contain a video without  a URL link
+        
+    Links:
+      <a class="qa-heading-link lx-stream-post__header-link"
+       href=/news/CATEG-NUMBER>...
     
-    links:
-    <a class="qa-heading-link lx-stream-post__header-link"
-    href=/news/CATEG-NUMBER>...
     
-    
-    pages:
+    Pages:
     <div class="lx-pagination__nav ..."
-    :)
-    <span class="lx-pagination__page-number qa-pagination-current-page-number">
-    CURRENT PAGE NUMBER
-    <span class="lx-pagination__page-number qa-pagination-total-page-number">
-    TOTAL NB PAGES
     
-    <a class="lx-pagination__btn gs-u-mr+ qa-pagination-next-page lx-pagination__btn--active"
-    LINK TO NEXT PAGE
-    href=/false/page/2
-    (needs selenium)
-    
+        <span class="lx-pagination__page-number qa-pagination-current-page-number">
+        CURRENT PAGE NUMBER
+            <span class="lx-pagination__page-number qa-pagination-total-page-number">
+        
+        TOTAL NB PAGES
+            <a class="lx-pagination__btn gs-u-mr+ qa-pagination-next-page lx-pagination__btn--active"
+        LINK TO NEXT PAGE
+            href=/false/page/2
+        
     """
 
     """ Create a tmp dir  to save the result in"""
@@ -217,7 +209,6 @@ if __name__ == "__main__":
     url_df = pandas.read_csv(url_list_path)
     url_df = url_df[url_df.url != r'http://www.bbc.co.uk/faqs/questions/bbc_online/sharing']
     url_df.to_csv(url_list_path, index=False)
-
 
     """
     FORMAT  OF BBC ARTICLE PAGES:
@@ -331,6 +322,7 @@ if __name__ == "__main__":
         print(f'{p} : {c}')
 
     """ Quit Selenium driver """
+
     driver.quit()
 
 
