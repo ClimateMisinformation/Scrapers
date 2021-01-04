@@ -1,7 +1,27 @@
-FROM python:3.8-slim-buster
+FROM python:3.7-slim-buster
 
 WORKDIR /usr/src/app
 COPY . .
+
+#============
+# Install Helper tools and FF lib dependencies
+#============
+RUN apt -qqy update \
+  && apt -qqy install \
+    wget \
+    curl \
+    bzip2 \
+    libappindicator3-1 \
+    libx11-xcb1 \
+    libdbus-glib-1-2 \
+    libxt6 \
+  && rm -rf /var/lib/apt/lists/* \
+  && apt -qyy clean
+
+
+#========================================
+# Install python requirements
+#========================================
 RUN pip install -r requirements.txt
 
 #========================================
@@ -15,23 +35,9 @@ RUN useradd seluser \
   && echo 'seluser:secret' | chpasswd \
   && echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-#============
-# Helper tools
-#============
-
-RUN apt -qqy update \
-  && apt -qqy install \
-    wget \
-    curl \
-    bzip2 \
-    fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 \
-    libnspr4 libnss3 lsb-release xdg-utils libxss1 libdbus-glib-1-2 \
-  && apt -qyy autoremove \
-  && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
 
 #============
-# GeckoDriver
+# Install GeckoDriver
 #============
 ARG GECKODRIVER_VERSION=latest
 RUN GK_VERSION=$(if [ ${GECKODRIVER_VERSION:-latest} = "latest" ]; then echo "0.28.0"; else echo $GECKODRIVER_VERSION; fi) \
@@ -44,23 +50,10 @@ RUN GK_VERSION=$(if [ ${GECKODRIVER_VERSION:-latest} = "latest" ]; then echo "0.
   && chmod 755 /opt/geckodriver-$GK_VERSION \
   && ln -fs /opt/geckodriver-$GK_VERSION /usr/bin/geckodriver
 
-#-----------------#
-# Mozilla
-#-----------------#
-# Install all Firefox dependencies
-# Adding libasound2 and others, credits to @jackTheRipper
-#  https://github.com/SeleniumHQ/docker-selenium/pull/418
-    # libasound2 \
-    # libpulse-dev \
-    # xul-ext-ubufox \
-RUN apt -qqy update \
-  && apt -qqy --no-install-recommends install \
-    `apt-cache depends firefox | awk '/Depends:/{print$2}'` \
-  && rm -rf /var/lib/apt/lists/* \
-  && apt -qyy clean
+
 
 #=============================
-# sudo by default from now on
+# Use sudo by default from now on
 #=============================
 USER root
 
@@ -85,5 +78,5 @@ RUN cd /opt \
 LABEL selenium_firefox_version="${FF_VER}"
 
 #USER seluser
-CMD [ "ldd", "/usr/bin/firefox" ]
+#CMD [ "ldd", "/usr/bin/firefox" ]
 CMD [ "python", "./sleep.py" ]
