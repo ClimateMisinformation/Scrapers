@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 from time import sleep
+
+import html2text
+import requests
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
@@ -34,6 +38,15 @@ def save_urls(urls_save):
     pandas.DataFrame({'url': urls_save}).to_csv(url_list_path, index=False)
 
 
+def clean_text(text_cleaned):
+    """
+       Cleans the article text by removing whitespace characters
+
+       @Args     A string of  text
+       @Returns  String of text
+    """
+    return re.sub(' $', '', re.sub('^ ', '', re.sub(' +', ' ', text_cleaned.replace('\n', ' '))))
+
 
 def extract_urls() -> list:
     """
@@ -43,7 +56,6 @@ def extract_urls() -> list:
     """
     url_count = 0
     current_urls = []
-    #nb_pages = int(driver.find_element_by_class_name('qa-pagination-total-page-number').text)
     # for each page
     for page_index in range(nb_pages):
         # scrape the links
@@ -141,12 +153,73 @@ if __name__ == "__main__":
         """ Create a list of the URLs leading to valid articles  """
         urls = extract_urls()
         urls = filter(filter_urls, urls)
-        print(*urls, sep="\n")
+        print(type(urls))
+#        print(*urls, sep="\n")
 
         """ Save a list of  scraped URLs """
         #save_urls(urls)
 
+    """
+        FORMAT  OF BBC ARTICLE PAGES:
+          inside <article>
+            inside <header>
+              title: h1 #main-heading 
+              author: just after the h1: p > span[1] > a text
+              date: just after the p: div > dd > span > span[1] > time (attr=) datetime="2020-11-23T22:24:21.000Z"
+              tags: just after the div: div > div[1] > div > ul > li[*] > a text
+            end </header>
+            content: div[*] with attr: data-component="text-block" > p text
+        """
 
-    """ Quit Selenium driver """
+    html_to_text_converter = html2text.HTML2Text()
+    html_to_text_converter.body_width = 0
+    html_to_text_converter.ignore_links = True
+
+    articleformat = {
+        'url': [],
+        'title': [],
+        'author': [],
+        'date': [],
+        'tags': [],
+        'text': [],
+    }
+
+    for url_index, url in enumerate(urls):
+        print(url)
+        response = requests.get(url)
+        if not response.ok:
+            print(f'Failed request:  {url}, result: {response.status_code}')
+            continue
+
+        page_soup = BeautifulSoup(response.text, 'html.parser')
+
+        try:
+            article_soup = page_soup.find('article')
+            header_soup = article_soup.find('header')
+            title_soup = header_soup.h1.text
+            author_soup = header_soup.p.text
+            date_soup = header_soup.find('time')
+            text_soup = article_soup.find_all(attrs={"data-component": "text-block"}).text
+
+            articleformat['url'].append(url)
+            articleformat['title'].append(title_soup)
+            articleformat['author'].append(author_soup)
+            articleformat['date'].append(date_soup)
+            #articleformat['tags'].append(tags)
+            articleformat['text'].append(text_soup)
+
+            print(articleformat)
+            print(*articleformat, sep="\n")
+
+        except AttributeError:
+            continue
+
+
+
+
+    """ 
+        Quit Selenium driver 
+    
+    """
 
     driver.quit()
