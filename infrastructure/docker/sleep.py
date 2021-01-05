@@ -171,10 +171,6 @@ if __name__ == "__main__":
             content: div[*] with attr: data-component="text-block" > p text
         """
 
-    html_to_text_converter = html2text.HTML2Text()
-    html_to_text_converter.body_width = 0
-    html_to_text_converter.ignore_links = True
-
     articleformat = {
         'url': [],
         'title': [],
@@ -199,7 +195,12 @@ if __name__ == "__main__":
             title_soup = header_soup.h1.text
             author_soup = header_soup.p.text
             date_soup = header_soup.find('time')
-            text_soup = article_soup.find_all(attrs={"data-component": "text-block"}).text
+            text_divs = article_soup.find_all(attrs={"data-component": "text-block"})
+            temp = []
+            for div in text_divs:
+                temp.append(div.text)
+            text_soup = " ".join(temp)
+
 
             articleformat['url'].append(url)
             articleformat['title'].append(title_soup)
@@ -208,14 +209,11 @@ if __name__ == "__main__":
             #articleformat['tags'].append(tags)
             articleformat['text'].append(text_soup)
 
-            print(articleformat)
-            print(*articleformat, sep="\n")
+            #print(articleformat)
+            #print(*articleformat, sep="\n")
 
         except AttributeError:
             continue
-
-
-
 
     """ 
         Quit Selenium driver 
