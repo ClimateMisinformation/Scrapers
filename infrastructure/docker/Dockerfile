@@ -55,8 +55,9 @@ RUN useradd seluser \
   && usermod -a -G sudo seluser \
   && gpasswd -a seluser video \
   && echo 'seluser:secret' | chpasswd \
-  && echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers
-
+  && echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers \
+  && chown seluser:seluser -R /usr/src/app \
+  && chmod -R 777 /usr/src/app
 
 #============
 # Install GeckoDriver
@@ -101,6 +102,6 @@ LABEL selenium_firefox_version="${FF_VER}"
 
 
 USER seluser
-#RUN chown dockuser:dockuser -R /app/
+
 ENTRYPOINT [ "python", "./bbc-scraper.py" ]
 CMD ["https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"]
