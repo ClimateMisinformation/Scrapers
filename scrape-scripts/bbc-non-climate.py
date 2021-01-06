@@ -19,8 +19,7 @@ import tempfile
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import NoSuchElementException as slnm_NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException as slnm_StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException as slnm_TimeoutException
@@ -41,14 +40,6 @@ def set_firefox_options() -> Options:
     firefox_opts.add_argument("--no-sandbox")
     firefox_opts.add_argument("--disable-dev-shm-usage")
     return firefox_opts
-
-
-def save_urls(urls_save):
-    """ Saves  the URLs collected to a CSV
-
-
-    """
-    pandas.DataFrame({'url': urls_save}).to_csv(url_list_path, index=False)
 
 
 def save_data(data_file_path_saved, articles_saved):
@@ -143,11 +134,6 @@ if __name__ == "__main__":
         
     """
 
-    """ Create a tmp dir  to save the result in"""
-    tmp_dir = tempfile.mkdtemp()
-    url_list_path = os.path.join(tmp_dir, url_list_file_name)
-    print('The URL path  is %s' % url_list_path)
-
     " For each search URL invoke selenium navigate the menu and save the linked to URLS "
     for topic, search_url in search_urls.items():
         """ Load the  search URL 
@@ -160,7 +146,7 @@ if __name__ == "__main__":
             continue
         try:
             element = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "bbccookies-continue-button"))
+                ec.element_to_be_clickable((By.ID, "bbccookies-continue-button"))
             )
             element = driver.find_element_by_id("bbccookies-continue-button").click()
         except slnm_NoSuchElementException:

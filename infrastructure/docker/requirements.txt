@@ -1,5 +1,4 @@
 beautifulsoup4==4.9.3
-html2text==2020.1.16
 requests==2.25.0
 selenium==3.141.0
 webdriver-manager==3.2.2

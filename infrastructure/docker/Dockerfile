@@ -1,5 +1,27 @@
 FROM python:3.7-slim-buster
 
+#============
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#============
+
+#============
+# Sets the firct URL which will be scraped by the container.
+# ENV is the default and used if a build var is  not passed.
+# If a build var is passed then ARG overides the default value.
+#============
+ARG URL
+ENV URL="https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
+
 WORKDIR /usr/src/app
 COPY . .
 
@@ -77,6 +99,5 @@ RUN cd /opt \
 
 LABEL selenium_firefox_version="${FF_VER}"
 
-#USER seluser
-#CMD [ "ldd", "/usr/bin/firefox" ]
-CMD [ "python", "./sleep.py" ]
+USER seluser
+CMD [ "python", "./bbc-scraper.py", "${URL}" ]
