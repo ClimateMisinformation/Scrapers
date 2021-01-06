@@ -147,6 +147,7 @@ if __name__ == "__main__":
     driver = webdriver.Firefox(executable_path=geckodriver_path, options=firefox_options,
                                service_log_path="/tmp/geckodriver.log")
     wait = WebDriverWait(driver, 10)
+    print(f'the URL is {search_url}')
 
     """ 
         Load the  search URL 

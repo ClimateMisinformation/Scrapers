@@ -99,5 +99,8 @@ RUN cd /opt \
 
 LABEL selenium_firefox_version="${FF_VER}"
 
+
 USER seluser
-CMD [ "python", "./bbc-scraper.py", "${URL}" ]
+#RUN chown dockuser:dockuser -R /app/
+ENTRYPOINT [ "python", "./bbc-scraper.py" ]
+CMD ["https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"]
