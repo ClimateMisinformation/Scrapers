@@ -27,6 +27,7 @@ from selenium.webdriver.common.by import By
 import pandas
 import re
 import argparse
+import os
 
 
 def set_firefox_options() -> Options:
@@ -133,12 +134,23 @@ if __name__ == "__main__":
     geckodriver_path = '/usr/bin/geckodriver'
     #  geckodriver_path = C:/ProgramData/chocolatey/bin/geckodriver.exe (windows)
 
-    # create parser
+    """
+       create argument parser
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("url")
     args = parser.parse_args()
     search_url = args.url
     urls = []
+
+    """
+       Remove output file if it already exists
+    """
+    try:
+        os.remove('/tmp/output.csv')
+    except OSError as e:
+        print("Error deleting: %s - %s." % (e.filename, e.strerror))
+        pass
 
     """
         Initiate the web driver
@@ -178,7 +190,7 @@ if __name__ == "__main__":
     """ Create a list of the URLs leading to valid articles  """
     urls = extract_urls()
     urls = filter(filter_urls, urls)
-    print(type(urls))
+    # print(type(urls))
     #        print(*urls, sep="\n")
 
     """
@@ -216,8 +228,8 @@ if __name__ == "__main__":
         try:
             article_soup = page_soup.find('article')
             header_soup = article_soup.find('header')
-            title_soup = header_soup.h1.content
-            author_soup = header_soup.strong.content
+            title_soup = header_soup.h1.text
+            author_soup = header_soup.p.span.strong.text
             date_soup = header_soup.find('time').text
             text_divs = article_soup.find_all(attrs={"data-component": "text-block"})
 

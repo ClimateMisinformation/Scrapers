@@ -79,16 +79,20 @@ The docker  container deployed is
 
     $docker ps    
     CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS         PORTS     NAMES
-    dbd4b57078d2   bbc:latest   "python /usr/src/app…"   27 minutes ago   Up 5 minutes             docker_bbc-non-climate_1
+    bbc-container   bbc:latest   "python /usr/src/app…"   27 minutes ago   Up 5 minutes             docker_bbc-non-climate_1
 
     
 The progress of the scraping can be seen using
 
-    docker exec dbd4b57078d2  ls -lat    
+    docker exec bbc-container  ls -lat    
 
 Copy data from the docker volume to current directory of the host
 
-    docker cp dbd4b57078d2:/tmp/output.csv output.csv
+    docker cp bbc-container:/tmp/output.csv output.csv
+
+Run the scraper script in a container using a different entry URL 
+
+    docker run --name bbc-container --volume bbc-vol -e URL=http://www.bbc.com  bbc 
 
 ## Notes
 To run the scraper script directly on your local machine outside of a container you  need define the path to geckodriver
