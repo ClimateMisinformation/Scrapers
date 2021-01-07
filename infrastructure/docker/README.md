@@ -1,7 +1,12 @@
-# Introduction
+# Containerizing the BBC scraping script
 
-  This docker container runs a script which scrapes the BBC.co.uk website for  non climate related articles. 
-  The entry URL is passed as single arg 'url'. Selenium is used to set cookies and  navigate the menu.  
+## Introduction
+
+  This docker container runs a script which scrapes the BBC.co.uk website for non climate related articles. The results 
+  are stored in docker volume  "bbc-vol"  as  "output.csv"
+  
+## Overview   
+  The entry URL is passed as single arg 'url'. Selenium is used to set cookies and  navigate the BBC menu.  
   A list  of  URLs containing news articles is collected from the entry URL page menu. The expected format of the 
   pages is: 
         
@@ -30,12 +35,14 @@
        'text': [],
      }
     
-  For each URL the article_content dict is saved to a csv file using  a panda dataframe. This is inefficient.
+  For each URL the article_content dict is added as a row to csv file using  a panda dataframe. 
             
-
     """
 
-# Usage
+## Usage
+The first  step is to build the  image locally and add it to your local docker repo.
+    
+    docker build -t bbc .
 
 This command deploys a docker container which will run the scraping script and save the collected data into a persistant
 docker volume.  
@@ -68,9 +75,6 @@ The details of the docker volume like the location on the host system can be see
     }
     ]
 
-
-    
-
 The docker  container deployed is 
 
     $docker ps    
@@ -86,7 +90,7 @@ Copy data from the docker volume to current directory of the host
 
     docker cp dbd4b57078d2:/tmp/output.csv output.csv
 
-# Notes:
+## Notes
 To run the scraper script directly on your local machine outside of a container you  need define the path to geckodriver
  on your local machine. 
 
