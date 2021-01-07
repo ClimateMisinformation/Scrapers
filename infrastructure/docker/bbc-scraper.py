@@ -147,7 +147,7 @@ if __name__ == "__main__":
     driver = webdriver.Firefox(executable_path=geckodriver_path, options=firefox_options,
                                service_log_path="/tmp/geckodriver.log")
     wait = WebDriverWait(driver, 10)
-    print(f'the URL is {search_url}')
+    print(f'The URL is {search_url}')
 
     """ 
         Load the  search URL 
@@ -241,7 +241,7 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            pandas.DataFrame.from_dict(article_content).to_csv('output.csv', index=False)
+            pandas.DataFrame.from_dict(article_content).to_csv('/tmp/output.csv', index=False)
         except Exception as e:
             print(e)
 

@@ -19,8 +19,8 @@ FROM python:3.7-slim-buster
 # ENV is the default and used if a build var is  not passed.
 # If a build var is passed then ARG overides the default value.
 #============
-ARG URL
-ENV URL="https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
+#ARG URL
+#ENV URL="https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
 
 WORKDIR /usr/src/app
 COPY . .
@@ -57,7 +57,8 @@ RUN useradd seluser \
   && echo 'seluser:secret' | chpasswd \
   && echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers \
   && chown seluser:seluser -R /usr/src/app \
-  && chmod -R 777 /usr/src/app
+  && chmod -R 777 /usr/src/app \
+  && chmod -R 777 /tmp
 
 #============
 # Install GeckoDriver
@@ -102,6 +103,6 @@ LABEL selenium_firefox_version="${FF_VER}"
 
 
 USER seluser
-
-ENTRYPOINT [ "python", "./bbc-scraper.py" ]
-CMD ["https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"]
+WORKDIR /tmp
+ENTRYPOINT [ "python" ]
+CMD [ "/usr/src/app/bbc-scraper.py" ,"https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"]

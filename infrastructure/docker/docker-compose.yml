@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  bbc-non-climate:
+    image: bbc:latest
+    volumes:
+      - bbc-vol:/tmp
+volumes:
+  bbc-vol:
+
