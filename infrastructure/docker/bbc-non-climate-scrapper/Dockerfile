@@ -24,11 +24,12 @@ ENV URL_ENV="${URL_ENV}"
 
 
 WORKDIR /usr/src/app
-COPY .. .
+COPY . .
 
 #============
 # Install Helper tools and FF lib dependencies
 #============
+
 RUN apt -qqy update \
   && apt -qqy install \
     wget \

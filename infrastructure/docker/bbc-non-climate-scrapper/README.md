@@ -2,8 +2,8 @@
 
 ## Introduction
 
-  This docker container runs a script which scrapes the BBC.co.uk website for non climate related articles. The results 
-  are stored in docker volume  "bbc-vol"  as  "output.csv"
+  This docker is built `bbc:latest` container runs a script which scrapes the BBC.co.uk website for non climate related articles. The results 
+  are stored in docker volume  `bbc-vol`  as  `output.csv`
   
 ## Overview   
   The entry URL is passed as single arg 'url'. Selenium is used to set cookies and  navigate the BBC menu.  
@@ -54,10 +54,11 @@ The docker volume is "docker_bbc-vol"
     $docker volume ls
     DRIVER    VOLUME NAME
     local     docker_bbc-vol
+    local     bbc-non-climate-scrapper_bbc-vol
 
 The details of the docker volume like the location on the host system can be seen using: 
 
-    $docker container inspect
+    $docker container inspect bbc-container
     
     [
     {
@@ -77,9 +78,9 @@ The details of the docker volume like the location on the host system can be see
 
 The docker  container deployed is 
 
-    $docker ps    
+    $docker ps -a | grep bbc-container  
     CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS         PORTS     NAMES
-    bbc-container   bbc:latest   "python /usr/src/app…"   27 minutes ago   Up 5 minutes             docker_bbc-non-climate_1
+    bbc-container   bbc:latest   "python /usr/src/app…"   27 minutes ago   Up 5 minutes             bbc-container
 
     
 The progress of the scraping can be seen using
@@ -90,10 +91,14 @@ Copy data from the docker volume to current directory of the host
 
     docker cp bbc-container:/tmp/output.csv output.csv
 
+
 Run the scraper script in a container using a different entry URL 
 
     docker run --name bbc-container --volume bbc-vol -e URL=http://www.bbc.com  bbc 
 
+```if you have not stopped you will get: 
+docker: Error response from daemon: Conflict. The container name "/bbc-container" is already in use by container "3df96f95bd39c177e56a177f1594bacc1516d6381995d3dfddc3f53b1157019f". You have to remove (or rename) that container to be able to reuse that name.
+```
 ## Notes
 To run the scraper script directly on your local machine outside of a container you  need define the path to geckodriver
  on your local machine. 
