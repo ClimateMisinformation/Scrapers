@@ -15,7 +15,6 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
 lib/
 lib64/
 parts/
@@ -129,3 +128,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# VSCode Workspace
+.code-workspace
+
+#Data folder:
+data/*
+
+#Macbook heritage
+.DS_Store

@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../laspdoccano"
+		},
+		{
+			"path": "../Scraper-new"
+		},
+		{
+			"path": "../doccano"
+		}
+	],
+	"settings": {}
+}

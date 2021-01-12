@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from nltk import WordNetLemmatizer, SnowballStemmer
 from nltk.corpus import stopwords
 import emoji
+
+
 stemmer = SnowballStemmer("english")
 lemmatizer = WordNetLemmatizer()
 
