@@ -2,7 +2,7 @@ version: "3.7"
 services:
   bbc-non-climate:
     image: bbc:latest
-    container_name: bbc-container
+    container_name: bbc-container2
     environment:
       URL_ENV: "https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
     volumes:

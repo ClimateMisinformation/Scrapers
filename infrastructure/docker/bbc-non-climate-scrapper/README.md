@@ -85,16 +85,16 @@ The docker  container deployed is
     
 The progress of the scraping can be seen using
 
-    docker exec bbc-container  ls -lat    
+    docker exec bbc-non-climate-scrapper_bbc-vol  ls -lat    
 
 Copy data from the docker volume to current directory of the host
 
-    docker cp bbc-container:/tmp/output.csv output.csv
+    docker cp bbc-non-climate-scrapper_bbc-vol:/tmp/output.csv output.csv
 
 
 Run the scraper script in a container using a different entry URL 
 
-    docker run --name bbc-container --volume bbc-vol -e URL=http://www.bbc.com  bbc 
+    docker run --name bbc-non-climate-scrapper_bbc-vol --volume bbc-vol -e URL=http://www.bbc.com  bbc 
 
 ```if you have not stopped you will get: 
 docker: Error response from daemon: Conflict. The container name "/bbc-container" is already in use by container "3df96f95bd39c177e56a177f1594bacc1516d6381995d3dfddc3f53b1157019f". You have to remove (or rename) that container to be able to reuse that name.
