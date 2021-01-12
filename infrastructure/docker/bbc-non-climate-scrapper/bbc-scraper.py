@@ -135,7 +135,7 @@ if __name__ == "__main__":
     #  geckodriver_path = C:/ProgramData/chocolatey/bin/geckodriver.exe (windows)
 
     """
-       create argument parser
+       create argument parser to receive URL to scrape
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("url")
