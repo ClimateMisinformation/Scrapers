@@ -31,7 +31,6 @@ html_to_text_converter.ignore_links = True
 
 
 links = soup.find_all(has_class_but_no_id, href=re.compile("text-"))
-
 for a in links:
     u = a['href']
     urls.append("https://www.dailymail.co.uk" + u)
