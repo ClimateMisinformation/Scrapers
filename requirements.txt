@@ -1,9 +1,9 @@
 beautifulsoup4==4.9.3
 html2text==2020.1.16
-numpy~=1.19.3
+numpy==1.19.3
 pandas==1.1.4
 requests==2.25.0
 selenium==3.141.0
 tqdm==4.54.1
-nltk~=3.5
+nltk==3.5
 newspaper3k==0.2.8
