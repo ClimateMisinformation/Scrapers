@@ -1,4 +1,4 @@
-Doccano has very especific data requirements, especially when it comes to the size of the csv files. 
+Doccano has very specific data requirements, especially when it comes to the size of the csv files. 
 
 
 This Python script:
