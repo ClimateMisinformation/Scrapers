@@ -63,7 +63,7 @@ RUN useradd seluser \
 #=============================
 # Use sudo by default from now on
 #=============================
-USER root
+#USER root
 
 
 USER seluser

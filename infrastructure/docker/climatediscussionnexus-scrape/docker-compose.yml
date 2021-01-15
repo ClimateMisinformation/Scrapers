@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  climatediscussionnexus:
+    image: climatediscussionnexus:latest
+    container_name: climatediscussionnexus
+    environment:
+      URL_ENV: "https://climatediscussionnexus.com/"
+    volumes:
+      - climatediscussionnexus-vol:/tmp
+    build:
+      context: ".."
+      args:
+        URL_ENV: "https://climatediscussionnexus.com/"
+volumes:
+  climatediscussionnexus-vol:
+

@@ -20,27 +20,28 @@ import re
 import argparse
 import os
 import newspaper
+from newspaper import Config
+from newspaper import Article
 
 
-
-def extract_urls(base_url) -> list:
+def extract_urls(base_url) -> set:
     """
        Navigates from the  menu on website  to links articles
 
        @Returns A list of URL to articles
     """
     current_urls = []
-    bb_paper = newspaper.build(base_url)
-    print(bb_paper.size())
-    for art in bb_paper.articles:
-        print(art.url)
-        current_urls.append(art.url)
+    paper = newspaper.build(base_url, config=config, memoize_articles=False, language='en')
+    print(paper.size())
+    for this_article in paper.articles:
+        print(this_article.url)
+        current_urls.append(this_article.url)
     return current_urls
 
 
 def filter_urls(url_to_check, base_url) -> bool:
     """
-        Filters the URLs collected so that  only those  from  http://www.bbc.co.uk and https://www.bbc.co.uk
+        Filters the URLs collected so that  only those  from base_url domain
         are kept. To remove the remaining non useful URLs we  assume  every  valid BBC article has a 8 digit
         string in its URI  and discard those which  do not.
 
@@ -92,17 +93,23 @@ if __name__ == "__main__":
     search_url = args.url
     urls = []
 
+    """ Configure newspaper user agent
     """
-       Remove output file if it already exists
+    USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
+    config = Config()
+    config.browser_user_agent = USER_AGENT
+    config.request_timeout = 10
+
+    """ Remove output file if it already exists
     """
+    outputfile = '/tmp/output.csv'
     try:
-        os.remove('output.csv')
+        os.remove(outputfile)
     except OSError as e:
         print("Error deleting: %s - %s." % (e.filename, e.strerror))
         pass
 
-    """ 
-        Load the  search URL 
+    """ Load the  search URL 
         Count the number  of pages in the topic
         Create a list of the URLs leading to valid articles 
     """
@@ -111,8 +118,6 @@ if __name__ == "__main__":
         print(f'The menu displayed on URL {search_url} leads to  { len(urls) } articles  to scrape')
     except Exception as e:
         print(e)
-
-
 
     article_content = {
         'url': [],
@@ -149,7 +154,7 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            pandas.DataFrame.from_dict(article_content).to_csv('output.csv', index=False)
+            pandas.DataFrame.from_dict(article_content).to_csv( outputfile , index=False)
         except Exception as e:
             print(e)
 
