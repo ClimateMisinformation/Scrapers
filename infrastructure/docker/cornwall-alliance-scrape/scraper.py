@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
         If URL passes the criteria defined by filter_url(), then it is visited and its content extracted using 
         Beautiful soup.  B. Soup cleans up the inner element text by converting it to UTF8.  
+        URLs ending with a /#respond  are collected which needs to be stopped.
         
         The data extracted is saved to  a  dictionary
 
