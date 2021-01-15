@@ -14,13 +14,6 @@ FROM python:3.7-slim-buster
 #   limitations under the License.
 #============
 
-#============
-# Sets the firct URL which will be scraped by the container.
-# This is passed  in most cases from docker compose.
-#============
-ENV URL_ENV="${URL_ENV}"
-
-
 WORKDIR /usr/src/app
 COPY . .
 
