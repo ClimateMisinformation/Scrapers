@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  cornwallalliance:
+    image: cornwallalliance:latest
+    container_name: cornwallalliancecontainer
+    environment:
+      URL_ENV: "https://cornwallalliance.org"
+    volumes:
+      - cornwallalliance-vol:/tmp
+    build:
+      context: "."
+      args:
+        URL_ENV: "https://cornwallalliance.org"
+volumes:
+  cornwallalliance-vol:
+
