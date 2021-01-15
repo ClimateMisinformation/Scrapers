@@ -57,6 +57,11 @@ if __name__ == "__main__":
         If URL passes the criteria defined by filter_url(), then it is visited and its content extracted using 
         Beautiful soup.  B. Soup cleans up the inner element text by converting it to UTF8.  
         
+        These urls are treated as different , which needs fixing
+        
+        https://www.icr.org/article/shedding-toxins-industrial-melanism/
+
+        
         The data extracted is saved to  a  dictionary
 
         article_content = {
