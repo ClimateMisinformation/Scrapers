@@ -154,7 +154,7 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            pandas.DataFrame.from_dict(article_content).to_csv( outputfile , index=False)
+            pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
         except Exception as e:
             print(e)
 
