@@ -120,7 +120,7 @@ if __name__ == "__main__":
     for url_index, url in enumerate(urls):
         print(url)
         try:
-            article = newspaper.Article(url, keep_article_html=True)
+            article = newspaper.Article(url)
             article.download()
 
         except Exception as e:

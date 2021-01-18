@@ -39,7 +39,7 @@ def extract_urls(base_url) -> set:
     return current_urls
 
 
-def filter_urls(url_to_check, base_url) -> bool:
+def filter_urls(url_to_check) -> bool:
     """
         Filters the URLs collected so that  only those  from base_url domain
         are kept. To remove the remaining non useful URLs we  assume  every  valid BBC article has a 8 digit
@@ -47,7 +47,7 @@ def filter_urls(url_to_check, base_url) -> bool:
 
         @Returns  bool True  if URL is valid.
     """
-    if base_url in url_to_check:
+    if 'https://climatediscussionnexus.com' in url_to_check:
         return True
     else:
         return False
@@ -115,6 +115,7 @@ if __name__ == "__main__":
     """
     try:
         urls = extract_urls(search_url)
+        urls = filter(filter_urls, urls)
         print(f'The menu displayed on URL {search_url} leads to  { len(urls) } articles  to scrape')
     except Exception as e:
         print(e)
@@ -143,7 +144,7 @@ if __name__ == "__main__":
             article.parse()
             article_content['url'].append(article.url)
             article_content['title'].append(article.title)
-            article_content['author'].append(article.authors)
+            article_content['author'].append("".join(article.authors))
             article_content['date'].append(article.publish_date)
             article_content['tags'].append('')
             article_content['text'].append(article.text)
