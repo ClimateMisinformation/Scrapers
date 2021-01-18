@@ -34,7 +34,7 @@ def extract_urls(base_url) -> set:
     paper = newspaper.build(base_url, config=config, memoize_articles=False, language='en')
     print(paper.size())
     for this_article in paper.articles:
-        print(this_article.url)
+        #print(this_article.url)
         current_urls.append(this_article.url)
     return current_urls
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
         If URL passes the criteria defined by filter_url(), then it is visited and its content extracted using 
         Beautiful soup.  B. Soup cleans up the inner element text by converting it to UTF8.  The  authors are  not
-        extracted. That  needs to be  fixed. 
+        extracted. That  needs to be  fixed.  Articles inner href with # in the URl are saved. THat is an problem. 
         
         The data extracted is saved to  a  dictionary
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     """ Remove output file if it already exists
     """
-    outputfile = '/tmp/output.csv'
+    outputfile = 'output.csv'
     try:
         os.remove(outputfile)
     except OSError as e:
@@ -120,8 +120,9 @@ if __name__ == "__main__":
     for url_index, url in enumerate(urls):
         print(url)
         try:
-            article = newspaper.Article(url)
+            article = newspaper.Article(url, keep_article_html=True)
             article.download()
+
         except Exception as e:
             print(e)
             continue
@@ -130,11 +131,10 @@ if __name__ == "__main__":
             article.parse()
             article_content['url'].append(article.url)
             article_content['title'].append(article.title)
-            article_content['author'].append(article.authors)
+            article_content['author'].append("".join(article.authors))
             article_content['date'].append(article.publish_date)
             article_content['tags'].append('')
             article_content['text'].append(article.text)
-
         except AttributeError:
             continue
         except Exception as e:
