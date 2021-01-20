@@ -22,6 +22,7 @@ import os
 import newspaper
 from newspaper import Config
 from newspaper import Article
+from newspaper.utils import BeautifulSoup
 
 
 def extract_urls(base_url) -> set:
@@ -34,17 +35,17 @@ def extract_urls(base_url) -> set:
     paper = newspaper.build(base_url, config=config, memoize_articles=False, language='en')
     print(paper.size())
     for this_article in paper.articles:
-        print(this_article.url)
+        #print(this_article.url)
         current_urls.append(this_article.url)
     return current_urls
 
 
-def filter_urls(url_to_check, base_url) -> bool:
+def filter_url(url_to_check) -> bool:
     """ Filters the URLs collected so that  only those  from base_url domain
         are kept.
         @Returns  bool True  if URL is valid.
     """
-    if base_url in url_to_check:
+    if search_url in url_to_check and not url_to_check.endswith('/'):
         return True
     else:
         return False
@@ -57,12 +58,7 @@ if __name__ == "__main__":
         If URL passes the criteria defined by filter_url(), then it is visited and its content extracted using 
         Beautiful soup.  B. Soup cleans up the inner element text by converting it to UTF8.  
         
-        These urls are treated as different , which needs fixing
-        
-        https://www.icr.org/article/shedding-toxins-industrial-melanism/
-
-        
-        The data extracted is saved to  a  dictionary
+        The data extracted is saved to  a  dictionary. Saving to a  CSV file fails
 
         article_content = {
         'url': [],
@@ -93,7 +89,7 @@ if __name__ == "__main__":
 
     """ Remove output file if it already exists
     """
-    outputfile = '/tmp/output.csv'
+    outputfile = 'output.csv'
     try:
         os.remove(outputfile)
     except OSError as e:
@@ -101,27 +97,18 @@ if __name__ == "__main__":
         pass
 
     """ Load the  search URL 
-        Count the number  of pages in the topic
         Create a list of the URLs leading to valid articles 
     """
     try:
         urls = extract_urls(search_url)
-        print(f'The menu displayed on URL {search_url} leads to  { len(urls) } articles  to scrape')
+        filtered_urls = [
+            url for url in urls if filter_url(url)
+        ]
+        print(f'The menu displayed on URL {search_url} leads to  {len(filtered_urls)} articles  to scrape')
     except Exception as e:
         print(e)
 
-    article_content = {
-        'url': [],
-        'title': [],
-        'author': [],
-        'date': [],
-        'tags': [],
-        'text': [],
-    }
-
-    field_names = ['url', 'title', 'author',  'date', 'tags', 'text']
-
-    for url_index, url in enumerate(urls):
+    for url_index, url in enumerate(filtered_urls):
         print(url)
         try:
             article = newspaper.Article(url)
@@ -130,22 +117,54 @@ if __name__ == "__main__":
             print(e)
             continue
 
-        try:
-            article.parse()
+        #try:
+        article_content = {
+            'url': [],
+            'title': [],
+            'author': [],
+            'date': [],
+            'tags': [],
+            'text': [],
+        }
+
+        article.parse()
+        soup = BeautifulSoup(article.html, 'html.parser')
+        article_author = soup.find(attrs={"itemprop": "author"})
+
+        if article.url is not None:
             article_content['url'].append(article.url)
+        else:
+            article_content['url'].append('URL not known')
+
+        if article.title is not None:
             article_content['title'].append(article.title)
-            article_content['author'].append(article.authors)
+        else:
+            article_content['title'].append('Title not known')
+
+        if article_author is not None:
+            article_content['author'].append(article_author.text)
+        else:
+            article_content['author'].append('Author not known')
+
+        if article.publish_date is not None:
             article_content['date'].append(article.publish_date)
-            article_content['tags'].append('')
-            article_content['text'].append(article.text)
+        else:
+            article_content['date'].append('Date not known')
 
-        except AttributeError:
-            continue
-        except Exception as e:
-            print(e)
+        article_content['tags'].append('')
 
-        try:
-            pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
-        except Exception as e:
-            print(e)
+        #if article.text is not None:
+        #    article_content['text'].append(article.text)
+        #else:
+        article_content['text'].append('Text not known')
+
+        #except AttributeError:
+        #    continue
+        #except Exception as e:
+        #    print(e)
+
+        #try:
+        pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
+        #except Exception as e:
+        #    print(e)
 
