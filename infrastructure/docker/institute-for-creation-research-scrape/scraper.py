@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     """ Remove output file if it already exists
     """
-    outputfile = 'output.csv'
+    outputfile = '/tmp/output.csv'
     try:
         os.remove(outputfile)
     except OSError as e:
