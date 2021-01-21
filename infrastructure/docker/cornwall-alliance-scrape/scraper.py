@@ -101,10 +101,10 @@ if __name__ == "__main__":
     """
     try:
         urls = extract_urls(search_url)
-        print(f'The menu displayed on URL {search_url} leads to  {len(urls)} articles  to scrape')
         filtered_urls = [
             url for url in urls if filter_url(url)
         ]
+        print(f'The menu displayed on URL {search_url} leads to  {len(filtered_url)} articles  to scrape')
     except Exception as e:
         print(e)
 
