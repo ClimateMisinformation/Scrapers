@@ -68,4 +68,4 @@ To start contributing, follow the steps below
     You're done. Wait for your code to get reviewed and merged.
     
 ## Git workflow
-We do not yet need to deploy to a production env many  times per day so we will use the GitHub flow strategy to merge changes.  It  is described here https://guides.github.com/introduction/flow/
+We do not yet need to deploy to a production env many times per day so we will use the GitHub flow strategy to merge changes.  It  is described here https://guides.github.com/introduction/flow/. The only GitHub Flow rule is  **Anything in the master branch is deployable**    Each change is reviewed on a feature branch then merged into master. 
