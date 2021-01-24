@@ -14,6 +14,15 @@ FROM python:3.7-slim-buster
 #   limitations under the License.
 #============
 
+#============
+# Sets the firct URL which will be scraped by the container.
+# ARG is the default and used if a build var is  not passed.
+# If a build var is passed then ENV overides the default value.
+#============
+ARG URL_ENV="https://www.icr.org"
+ENV URL_ENV="${URL_ENV}"
+
+
 WORKDIR /usr/src/app
 COPY . .
 
@@ -60,4 +69,3 @@ USER root
 USER seluser
 WORKDIR /tmp
 ENTRYPOINT [ "python" ,"/usr/src/app/scraper.py" ]
-CMD ["https://www.icr.org"]

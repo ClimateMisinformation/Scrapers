@@ -9,6 +9,8 @@ services:
       - technocracynews-vol:/tmp
     build:
       context: "."
+      args:
+        URL_ENV: "https://www.technocracy.news/"
 volumes:
   technocracynews-vol:
 
