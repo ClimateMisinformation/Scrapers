@@ -69,4 +69,3 @@ USER root
 USER seluser
 WORKDIR /tmp
 ENTRYPOINT [ "python" ,"/usr/src/app/scraper.py" ]
-CMD ["https://climatediscussionnexus.com/"]

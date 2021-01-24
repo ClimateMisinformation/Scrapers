@@ -13,4 +13,3 @@ services:
         URL_ENV: "https://climatediscussionnexus.com/"
 volumes:
   climatediscussionnexus-vol:
-
