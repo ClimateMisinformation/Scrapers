@@ -75,9 +75,14 @@ if __name__ == "__main__":
        create argument parser to receive URL to scrape
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("url")
+    parser.add_argument("--url",  help="base URL of the news source")
     args = parser.parse_args()
-    search_url = args.url
+    if args.url:
+        search_url = args.url
+    else:
+        for k, v in os.environ.items():
+            print(f'{k}={v}')
+        search_url = os.environ.get('URL_ENV')
     urls = []
 
     """ Configure newspaper user agent

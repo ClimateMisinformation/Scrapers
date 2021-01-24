@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  climatediscussionnexus:
+  breitbartnews:
     image: breitbartnews:latest
     container_name: breitbartnewscontainer
     environment:
