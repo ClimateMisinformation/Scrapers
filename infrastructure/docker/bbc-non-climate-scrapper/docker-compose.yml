@@ -2,13 +2,13 @@ version: "3.7"
 services:
   bbc-non-climate:
     image: bbc:latest
-    container_name: bbc-container2
+    container_name: bbc-container
     environment:
       URL_ENV: "https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
     volumes:
       - bbc-vol:/tmp
     build:
-      context: ".."
+      context: "."
       args:
         URL_ENV: "https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
 volumes:

@@ -14,14 +14,6 @@ FROM python:3.7-slim-buster
 #   limitations under the License.
 #============
 
-#============
-# Sets the firct URL which will be scraped by the container.
-# ARG is the default and used if a build var is  not passed.
-# If a build var is passed then ENV overides the default value.
-#============
-ARG URL_ENV="https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"
-ENV URL_ENV="${URL_ENV}"
-
 
 WORKDIR /usr/src/app
 COPY . .
@@ -106,5 +98,5 @@ LABEL selenium_firefox_version="${FF_VER}"
 
 USER seluser
 WORKDIR /tmp
-ENTRYPOINT [ "python" ,"/usr/src/app/bbc-scraper.py" ]
+ENTRYPOINT [ "python" ,"/usr/src/app/scraper.py" ]
 CMD ["https://www.bbc.co.uk/news/topics/cp7r8vglgq1t/food"]
