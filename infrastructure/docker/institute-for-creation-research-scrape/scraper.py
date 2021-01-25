@@ -23,7 +23,9 @@ import newspaper
 from newspaper import Config
 from newspaper import Article
 from newspaper.utils import BeautifulSoup
-
+from itertools import zip_longest
+import pandas as pd
+import numpy as np
 
 def extract_urls(base_url) -> set:
     """
@@ -71,6 +73,19 @@ if __name__ == "__main__":
 
     """
 
+    """ Create  dict to store what  is scraped from the articles 
+    """
+    article_content = {
+        'url': [],
+        'title': [],
+        'author': [],
+        'date': [],
+        'tags': [],
+        'text': [],
+    }
+
+    urls = []
+
     """
        create argument parser to receive URL to scrape
     """
@@ -83,7 +98,7 @@ if __name__ == "__main__":
         search_url = os.environ.get('URL_ENV')
     else:
         print("No news-source URL is defined")
-    urls = []
+
 
     """ Configure newspaper user agent
     """
@@ -100,6 +115,7 @@ if __name__ == "__main__":
     except OSError as e:
         print("Error deleting: %s - %s." % (e.filename, e.strerror))
         pass
+
 
     """ Load the  search URL 
         Create a list of the URLs leading to valid articles 
@@ -122,54 +138,52 @@ if __name__ == "__main__":
             print(e)
             continue
 
-        #try:
-        article_content = {
-            'url': [],
-            'title': [],
-            'author': [],
-            'date': [],
-            'tags': [],
-            'text': [],
-        }
+        try:
 
-        article.parse()
-        soup = BeautifulSoup(article.html, 'html.parser')
-        article_author = soup.find(attrs={"itemprop": "author"})
+            article.parse()
+            soup = BeautifulSoup(article.html, 'html.parser')
+            article_author = soup.find(attrs={"itemprop": "author"})
 
-        if article.url is not None:
-            article_content['url'].append(article.url)
-        else:
-            article_content['url'].append('URL not known')
+            if article.url is not None:
+                article_content['url'].append(article.url)
+            else:
+                article_content['url'].append('URL not known')
 
-        if article.title is not None:
-            article_content['title'].append(article.title)
-        else:
-            article_content['title'].append('Title not known')
+            if article.title is not None:
+                 article_content['title'].append(article.title)
+            else:
+                 article_content['title'].append('Title not known')
 
-        if article_author is not None:
-            article_content['author'].append(article_author.text)
-        else:
-            article_content['author'].append('Author not known')
+            if article_author is not None:
+                 article_content['author'].append(article_author.text.strip().replace("\n", " ").replace(",", " "))
+            else:
+                 article_content['author'].append('Author not known')
 
-        if article.publish_date is not None:
-            article_content['date'].append(article.publish_date)
-        else:
-            article_content['date'].append('Date not known')
+            if article.publish_date is not None:
+                 article_content['date'].append(article.publish_date)
+            else:
+                 article_content['date'].append('Publish date not known')
 
-        article_content['tags'].append('')
+            article_content['tags'].append('No tags')
 
-        #if article.text is not None:
-        #    article_content['text'].append(article.text)
-        #else:
-        article_content['text'].append('Text not known')
+            if article.text is not None:
+                 text = article.text.replace("\n", " ").replace(",", " ")
+                 article_content['text'].append(text)
+            else:
+                 article_content['text'].append('Text not known')
 
-        #except AttributeError:
-        #    continue
-        #except Exception as e:
-        #    print(e)
+        except AttributeError:
+            continue
+        except Exception as e:
+            print(e)
 
-        #try:
-        pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
-        #except Exception as e:
-        #    print(e)
+        try:
+            """
+            For iterables of uneven length, zip_longest fills missing values with the fill value. 
+            """
+            zl = list(zip_longest(*article_content.values()))
+            df = pandas.DataFrame(zl, columns=article_content.keys())
+            df.to_csv(outputfile,  index=False)
+        except Exception as e:
+            print(e)
 
