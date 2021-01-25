@@ -24,8 +24,7 @@ from newspaper import Config
 from newspaper import Article
 from newspaper.utils import BeautifulSoup
 from itertools import zip_longest
-import pandas as pd
-import numpy as np
+
 
 def extract_urls(base_url) -> set:
     """
@@ -139,11 +138,17 @@ if __name__ == "__main__":
             continue
 
         try:
-
+            """
+            Using custom  BSoup filters because newpaper3k default did not find the content wanted.
+            """
             article.parse()
             soup = BeautifulSoup(article.html, 'html.parser')
             article_author = soup.find(attrs={"itemprop": "author"})
 
+            """
+            Checks if the value we want  is captured by our  custom BS filters. If not then checks newspaper3k
+            generic article processing, if this is None then we use a placeholder. The captured value are appended to a row in the articles dict.
+            """
             if article.url is not None:
                 article_content['url'].append(article.url)
             else:

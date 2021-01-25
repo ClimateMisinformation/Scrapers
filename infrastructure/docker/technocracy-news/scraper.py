@@ -23,7 +23,7 @@ import newspaper
 from newspaper import Config
 from newspaper import Article
 from newspaper.utils import BeautifulSoup
-
+from itertools import zip_longest
 
 def extract_urls(base_url) -> set:
     """
@@ -100,6 +100,18 @@ if __name__ == "__main__":
     else:
         print("No news-source URL is defined")
 
+    """ Create  dict to store what  is scraped from the articles 
+    """
+    article_content = {
+            'url': [],
+            'title': [],
+            'author': [],
+            'date': [],
+            'tags': [],
+            'text': [],
+        }
+    """ Create lists of URLs extracted  from URL searched.
+    """
     urls = []
     filtered_urls = []
 
@@ -112,7 +124,7 @@ if __name__ == "__main__":
 
     """ Remove output file if it already exists
     """
-    outputfile = '/tmp/output.json'
+    outputfile = '/tmp/output.csv'
     try:
         os.remove(outputfile)
     except OSError as e:
@@ -120,7 +132,6 @@ if __name__ == "__main__":
         pass
 
     """ Load the  search URL 
-        Count the number  of pages in the topic
         Create a list of the URLs leading to valid articles 
     """
     try:
@@ -132,16 +143,9 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
 
-    article_content = {
-            'url': [],
-            'title': [],
-            'author': [],
-            'date': [],
-            'tags': [],
-            'text': [],
-        }
 
-    field_names = ['url', 'title', 'author',  'date', 'tags', 'text']
+
+
 
     for url_index, url in enumerate(filtered_urls):
         # print(url)
@@ -159,15 +163,41 @@ if __name__ == "__main__":
             print(e)
 
         try:
-
+            """
+            Using custom  BSoup filters when newpaper3k default did not find the content wanted.
+            """
             article_content['url'].append(article.url)
             article_content['title'].append(article.title)
-            article_content['author'].append(article.authors)
-            article_content['date'].append(article.publish_date)
-            article_content['tags'].append('')
-            article_content['text'].append(article.text)
+            article_author = soup.find('a', attrs={"class": "fn"})
+            article_date = soup.find('span', attrs={"class": "entry-meta-date updated"})
 
-            #print(article_content)
+            """
+            Checks if the value we want  is captured by our  custom BS filters. If not then checks newspaper3k
+            generic article processing, if this is None then we use a placeholder. The captured value are appended to a row in the articles dict.
+            """
+            if article_author.text is not None:
+                article_content['author'].append(article_author.text.strip())
+            elif article.authors is not None:
+                authors = ' '.join(article.authors)
+                article_content['author'].append(authors)
+            else:
+                article_content['author'].append('Author not known')
+
+            if article_date.text is not None:
+                article_content['date'].append(article_date.text)
+            elif article.publish_date is not None:
+                article_content['date'].append(article.publish_date)
+            else:
+                article_content['date'].append('Publish date not known')
+
+            article_content['tags'].append('')
+
+            if article.text is not None:
+                 text = article.text.strip().replace("\n", " ").replace(",", " ")
+                 article_content['text'].append(text)
+            else:
+                 article_content['text'].append('Text not known')
+
         except AttributeError as e:
             print(e)
             continue
@@ -175,7 +205,13 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            pandas.DataFrame.from_dict(article_content).to_json(outputfile)
+            """
+            For iterables of uneven length, zip_longest fills missing values with the fill value. 
+            """
+            zl = list(zip_longest(*article_content.values()))
+            df = pandas.DataFrame(zl, columns=article_content.keys())
+            df.to_csv(outputfile, index=False)
+            # pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
         except Exception as e:
             print(e)
 
