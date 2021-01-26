@@ -20,7 +20,7 @@ Description of directories
    
 ## format_data_for_doccano 
 
-  Doccano has very especific data requirements, especially when it comes to the size of the csv files.
+  Doccano has very specific data requirements, especially when it comes to the size of the csv files.
 
   This Python script:
 
@@ -48,9 +48,9 @@ Description of directories
 
 You can contribute to this repository by solving an issue and suggesting improvements/changes in the code, documentation and project organisation. Look for issues labeled "good-first-issue"
 
-When contributing to this repository, please first communicate with the owners of this repository the change you wish to make via a github-issue or slack https://aiforgoodcommunity.slack.com/#climate-misinformation  before starting to work on it.
+When contributing to this repository, please first communicate with the owners of this repository the change you wish to make via a GitHub [Issues](https://github.com/ClimateMisinformation/Scrapers/issues) or our [Slack Channel](https://aiforgoodcommunity.slack.com/#climate-misinformation)  before starting to work on it.
 
-If you  are working on an existing issue please assign it to yourself in githbn issues  so that  it is visible what you  are  doing and unneeded replication is avoided. When you  finish working on an issue unassign yourself. 
+If you  are working on an existing issue please assign it to yourself using GitHub [Issues](https://github.com/ClimateMisinformation/Scrapers/issues)  so that  it is visible what you  are  doing and unneeded replication is avoided. When you  finish working on an issue unassign yourself. 
 
 To start contributing, follow the steps below
 
@@ -67,5 +67,7 @@ To start contributing, follow the steps below
     Add a suitable title and description to the pull request and tag the issue number in Pull Request description, if the pull request is related to some issue logged here: Issues
     You're done. Wait for your code to get reviewed and merged.
     
+If you need more information then read the [CONTRIBUTING](https://github.com/ClimateMisinformation/Scrapers/blob/master/docs/CONTRIBUTING.md)  guide.
+
 ## Git workflow
 We do not yet need to deploy to a production env many times per day so we will use the GitHub flow strategy to merge changes.  It  is described here https://guides.github.com/introduction/flow/. The only GitHub Flow rule is  **Anything in the master branch is deployable**    Each change is reviewed on a feature branch then merged into master. 
