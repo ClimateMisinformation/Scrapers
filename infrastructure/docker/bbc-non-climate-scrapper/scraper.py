@@ -131,8 +131,8 @@ if __name__ == "__main__":
             
 
     """
-    geckodriver_path = '/usr/bin/geckodriver'
-    #  geckodriver_path = C:/ProgramData/chocolatey/bin/geckodriver.exe (windows)
+    #geckodriver_path = '/usr/bin/geckodriver'
+    geckodriver_path = "C:/ProgramData/chocolatey/bin/geckodriver.exe" #(windows)
 
     """
        create argument parser to receive URL to scrape

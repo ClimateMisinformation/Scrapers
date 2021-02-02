@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  instituteforcreationresearch:
+    image: instituteforcreationresearch:latest
+    container_name: instituteforcreationresearchcontainer
+    environment:
+      URL_ENV: "https://www.icr.org"
+    volumes:
+      - instituteforcreationresearch-vol:/tmp
+    build:
+      context: "."
+      args:
+        URL_ENV: "https://www.icr.org"
+volumes:
+  instituteforcreationresearch-vol:
+

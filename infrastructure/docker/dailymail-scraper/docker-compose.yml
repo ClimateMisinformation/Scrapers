@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  dailymail:
+    image: dailymail:latest
+    container_name: dailymailcontainer
+    environment:
+      URL_ENV: "https://www.dailymail.co.uk/"
+    volumes:
+      - dailymail-vol:/tmp
+    build:
+      context: "."
+      args:
+        URL_ENV: "https://www.dailymail.co.uk/"
+volumes:
+  dailymail-vol:
+

@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  technocracynews:
+    image: technocracynews:latest
+    container_name: technocracynewscontainer
+    environment:
+      URL_ENV: "https://www.technocracy.news/"
+    volumes:
+      - technocracynews-vol:/tmp
+    build:
+      context: "."
+      args:
+        URL_ENV: "https://www.technocracy.news/"
+volumes:
+  technocracynews-vol:
+

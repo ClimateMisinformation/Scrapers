@@ -2,11 +2,11 @@
 
 ## Introduction
 
-  This docker is built `bbc:latest` container runs a script which scrapes the BBC.co.uk website for non climate related articles. The results 
+  This docker container is built `bbc:latest` image. The image defined in this dir, runs a script which scrapes the BBC.co.uk website for non climate related articles. The results 
   are stored in docker volume  `bbc-vol`  as  `output.csv`
   
 ## Overview   
-  The entry URL is passed as single arg 'url'. Selenium is used to set cookies and  navigate the BBC menu.  
+  The entry URL is passed as single arg 'url' to scraper.py. Selenium is used to set cookies and  navigate the BBC menu.  
   A list  of  URLs containing news articles is collected from the entry URL page menu. The expected format of the 
   pages is: 
         
@@ -53,27 +53,26 @@ The docker volume is "docker_bbc-vol"
 
     $docker volume ls
     DRIVER    VOLUME NAME
-    local     docker_bbc-vol
     local     bbc-non-climate-scrapper_bbc-vol
 
 The details of the docker volume like the location on the host system can be seen using: 
 
-    $docker container inspect bbc-container
+    $docker  volume inspect bbc-non-climate-scrapper_bbc-vol
     
     [
-    {
-        "CreatedAt": "2021-01-07T10:53:01Z",
-        "Driver": "local",
-        "Labels": {
-            "com.docker.compose.project": "docker",
-            "com.docker.compose.version": "1.27.4",
-            "com.docker.compose.volume": "bbc-vol"
-        },
-        "Mountpoint": "/var/lib/docker/volumes/docker_bbc-vol/_data",
-        "Name": "docker_bbc-vol",
-        "Options": null,
-        "Scope": "local"
-    }
+        {
+            "CreatedAt": "2021-01-24T13:16:29Z",
+            "Driver": "local",
+            "Labels": {
+                "com.docker.compose.project": "bbc-non-climate-scrapper",
+                "com.docker.compose.version": "1.27.4",
+                "com.docker.compose.volume": "bbc-vol"
+            },
+            "Mountpoint": "/var/lib/docker/volumes/bbc-non-climate-scrapper_bbc-vol/_data",
+            "Name": "bbc-non-climate-scrapper_bbc-vol",
+            "Options": null,
+            "Scope": "local"
+        }
     ]
 
 The docker  container deployed is 
@@ -85,7 +84,7 @@ The docker  container deployed is
     
 The progress of the scraping can be seen using
 
-    docker exec bbc-non-climate-scrapper_bbc-vol  ls -lat    
+    docker exec bbc-container ls -lat    
 
 Copy data from the docker volume to current directory of the host
 
@@ -100,8 +99,8 @@ Run the scraper script in a container using a different entry URL
 docker: Error response from daemon: Conflict. The container name "/bbc-container" is already in use by container "3df96f95bd39c177e56a177f1594bacc1516d6381995d3dfddc3f53b1157019f". You have to remove (or rename) that container to be able to reuse that name.
 ```
 ## Notes
-To run the scraper script directly on your local machine outside of a container you  need define the path to geckodriver
- on your local machine. 
+To run the scraper script directly on your local machine outside of a container you  need to edit scraper.py to redefine the path to geckodriver
+ on your local machine. I installed gecko driver on windows 10 using chocolatey and edited line 135 of scraper.py. 
 
     geckodriver_path = '/usr/bin/geckodriver'  (debian)
     geckodriver_path = C:/ProgramData/chocolatey/bin/geckodriver.exe (windows)

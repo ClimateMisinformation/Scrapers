@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  breitbartnews:
+    image: breitbartnews:latest
+    container_name: breitbartnewscontainer
+    environment:
+      URL_ENV: "https://www.breitbart.com/"
+    volumes:
+      - breitbartnews-vol:/tmp
+    build:
+      context: "."
+      args:
+        URL_ENV: "https://www.breitbart.com/"
+volumes:
+  breitbartnews-vol:
+
