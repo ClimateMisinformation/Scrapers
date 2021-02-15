@@ -24,7 +24,8 @@ from newspaper import Config
 from newspaper import Article
 from newspaper.utils import BeautifulSoup
 
-def extract_urls(base_url) -> set:
+
+def extract_urls(base_url) -> list:
     """
        Navigates from the  menu on website  to links articles
 
@@ -167,4 +168,3 @@ if __name__ == "__main__":
             pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
         except Exception as e:
             print(e)
-
