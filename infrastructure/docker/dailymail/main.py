@@ -12,28 +12,31 @@
 # limitations under the License.
 
 
-import scraper
+from scraper import Tools
 from flask import Flask, request, escape
 from google.cloud import pubsub_v1
+from newspaper import Config
+from newspaper import Article
 
 
 def publish(messages):
-    print("foo")
     project_id = "linux-academy-project-91522"
     topic_name = "dailymail-url"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_name)
+    print(messages)
     for message in messages:
-        future = publisher.publish(
-            topic_path, data=message.encode('utf-8')
-        )
+        data = message.encode('utf-8')
+        future = publisher.publish( topic_path, data)
+        print(future.result())
+    print(f"Published messages to {topic_path}")
 
 
-def scrape(a_request):
-
+def scrape(request):
     filtered_urls = []
-    request_json = a_request.get_json(silent=True)
-    request_args = a_request.args
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+
 
     if request_json and 'url' in request_json:
         search_url = request_json['url']
@@ -42,16 +45,20 @@ def scrape(a_request):
     else:
         search_url = 'https://www.dailymail.co.uk/'
 
-    """ Load the  search URL 
-           Create a list of the URLs leading to valid articles 
-       """
+    """ Configure newspaper user agent
+    """
+    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
+    config = Config()
+    config.browser_user_agent = user_agent
+    config.request_timeout = 10
+
     try:
-        urls = scraper.extract_urls(search_url)
-        print(urls)
+        urls = Tools.extract_urls(search_url)
+        #print(urls)
         filtered_urls = [
-            url for url in urls if filter_urls(url)
+            url for url in urls if Tools.filter_urls(url,search_url)
         ]
-        print(f'The menu displayed on URL {search_url} leads to  {len(filtered_urls)} articles  to scrape')
+        # print(f'The menu displayed on URL {search_url} leads to  {len(filtered_urls)} articles  to scrape')
     except Exception as e:
         print(e)
     publish(filtered_urls)
