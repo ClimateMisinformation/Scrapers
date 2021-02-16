@@ -25,39 +25,50 @@ from newspaper import Article
 from newspaper.utils import BeautifulSoup
 
 
-def extract_urls(base_url) -> list:
-    """
-       Navigates from the  menu on website  to links articles
+class Tools:
+    def __init__(self, name):
+        self.name = name
 
-       @Returns A list of URL to articles
-    """
-    current_urls = []
-    paper = newspaper.build(base_url, config=config, memoize_articles=False, language='en')
-    for this_article in paper.articles:
-        current_urls.append(this_article.url)
-    return current_urls
+    @staticmethod
+    def extract_urls(base_url) -> list:
+        """
+           Navigates from the  menu on website  to links articles
 
+           @Returns A list of URL to articles
+        """
+        current_urls = []
+        """ Configure newspaper user agent
+           """
+        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
+        config = Config()
+        config.browser_user_agent = user_agent
+        config.request_timeout = 10
+        paper = newspaper.build(base_url, config=config, memoize_articles=False, language='en')
+        for this_article in paper.articles:
+            current_urls.append(this_article.url)
+        return current_urls
 
-def filter_urls(url_to_check) -> bool:
-    """ Filters the URLs collected so that  only those  from base_url domain
-        are kept. In-page html links '#' are removed.
-        @Returns  bool True  if URL is valid.
-    """
-    if search_url in url_to_check and '#' not in url_to_check:
-        return True
-    else:
-        return False
+    @staticmethod
+    def filter_urls(url_to_check, srch_url) -> bool:
+        """ Filters the URLs collected so that  only those  from base_url domain
+            are kept. In-page html links '#' are removed.
+            @Returns  bool True  if URL is valid.
+        """
+        if srch_url in url_to_check and '#' not in url_to_check:
+            return True
+        else:
+            return False
 
-
-def clean_text(dirtytext):
-    """ Cleans the text content collected so that text such as boilerplate form labels and empty space are removed
-    /n are  kept which  may  cause a problem.
-    @Returns  bool True  is content is valid
-    """
-    if len(dirtytext) < 3:
-        return False
-    else:
-        return True
+    @staticmethod
+    def clean_text(dirty_text):
+        """ Cleans the text content collected so that text such as boilerplate form labels and empty space are removed
+        /n are  kept which  may  cause a problem.
+        @Returns  bool True  is content is valid
+        """
+        if len(dirty_text) < 3:
+            return False
+        else:
+            return True
 
 
 if __name__ == "__main__":
@@ -92,22 +103,17 @@ if __name__ == "__main__":
     elif os.environ.get('URL_ENV'):
         search_url = os.environ.get('URL_ENV')
     else:
-        print("No news-source URL is defined in the script arguments")
+        search_url = 'https://www.dailymail.co.uk/'
+        print("No news source is defined in the script arguments. "
+              "Setting search_url = 'https://www.dailymail.co.uk/' ")
     urls = []
     filtered_urls = []
 
-    """ Configure newspaper user agent
-    """
-    USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
-    config = Config()
-    config.browser_user_agent = USER_AGENT
-    config.request_timeout = 10
-
     """ Remove output file if it already exists
     """
-    outputfile = '/tmp/output.csv'
+    output_file = '/tmp/output.csv'
     try:
-        os.remove(outputfile)
+        os.remove(output_file)
     except OSError as e:
         print("Error deleting: %s - %s." % (e.filename, e.strerror))
         pass
@@ -116,10 +122,9 @@ if __name__ == "__main__":
         Create a list of the URLs leading to valid articles 
     """
     try:
-        urls = extract_urls(search_url)
+        urls = Tools.extract_urls(search_url)
         filtered_urls = [
-            url for url in urls if filter_urls(url)
-        ]
+            url for url in urls if Tools.filter_urls(url, search_url)]
         print(f'The menu displayed on URL {search_url} leads to  { len(filtered_urls) } articles  to scrape')
     except Exception as e:
         print(e)
@@ -165,6 +170,6 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
+            pandas.DataFrame.from_dict(article_content).to_csv(output_file, index=False)
         except Exception as e:
             print(e)

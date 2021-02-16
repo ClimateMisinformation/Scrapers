@@ -24,19 +24,18 @@ def publish(messages):
     topic_name = "dailymail-url"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_name)
-    print(messages)
+    # print(messages)
     for message in messages:
         data = message.encode('utf-8')
-        future = publisher.publish( topic_path, data)
-        print(future.result())
+        future = publisher.publish(topic_path, data)
+        #print(future.result())
     print(f"Published messages to {topic_path}")
 
 
-def scrape(request):
+def scrape(req):
     filtered_urls = []
-    request_json = request.get_json(silent=True)
-    request_args = request.args
-
+    request_json = req.get_json(silent=True)
+    request_args = req.args
 
     if request_json and 'url' in request_json:
         search_url = request_json['url']
@@ -54,11 +53,10 @@ def scrape(request):
 
     try:
         urls = Tools.extract_urls(search_url)
-        #print(urls)
         filtered_urls = [
-            url for url in urls if Tools.filter_urls(url,search_url)
+            url for url in urls if Tools.filter_urls(url, search_url)
         ]
-        # print(f'The menu displayed on URL {search_url} leads to  {len(filtered_urls)} articles  to scrape')
+        print(f'The menu displayed on URL {search_url} leads to  {len(filtered_urls)} articles  to scrape')
     except Exception as e:
         print(e)
     publish(filtered_urls)
