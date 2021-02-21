@@ -21,7 +21,7 @@ from newspaper import Article
 
 def publish(messages):
     project_id = "linux-academy-project-91522"
-    topic_name = "dailymail-url"
+    topic_name = "hello_topic"
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_name)
     # print(messages)
@@ -115,10 +115,10 @@ if __name__ == "__main__":
 
     @app.route('/', methods=['POST', 'GET'])
     def default():
-        return scrape(request)
+        return
+        #return scrape(request)
 
 
     # option 2
     app.add_url_rule('/scrape', 'scrape', scrape, methods=['POST', 'GET'], defaults={'request': request})
-
     app.run(host='127.0.0.1', port=8088, debug=True)
