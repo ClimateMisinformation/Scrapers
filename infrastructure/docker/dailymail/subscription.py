@@ -19,7 +19,7 @@ import os
 from scraper import Tools
 from google.cloud import pubsub_v1
 from newspaper import Article
-
+import pandas
 
 def sub(project_id, subscription_id, timeout=None):
     """Receives messages from a Pub/Sub subscription."""
@@ -106,6 +106,7 @@ if __name__ == "__main__":
         try:
             article = Article(url)
             article.download()
+            article.parse()
         except Exception as e:
             print(e)
             continue
@@ -124,7 +125,8 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            pandas.DataFrame.from_dict(article_content).to_csv(output_file, index=False)
+            # pandas.DataFrame.from_dict(article_content).to_csv(output_file, index=False)
+            pandas.DataFrame.from_dict(article_content).to_gbq(output_file)
         except Exception as e:
             print(e)
 
