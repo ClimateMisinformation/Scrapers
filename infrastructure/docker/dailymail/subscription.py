@@ -20,6 +20,7 @@ from scraper import Tools
 from google.cloud import pubsub_v1
 from newspaper import Article
 import pandas
+import pandas_gbq
 
 def sub(project_id, subscription_id, timeout=None):
     """Receives messages from a Pub/Sub subscription."""
@@ -70,12 +71,7 @@ if __name__ == "__main__":
     url_list = sub(args.project_id, args.subscription_id, args.timeout)
     print(url_list)
 
-    output_file = '/tmp/output.csv'
-    try:
-        os.remove(output_file)
-    except OSError as e:
-        print("Error deleting: %s - %s." % (e.filename, e.strerror))
-        pass
+
 
     try:
         filtered_urls = [
@@ -125,8 +121,9 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            # pandas.DataFrame.from_dict(article_content).to_csv(output_file, index=False)
-            pandas.DataFrame.from_dict(article_content).to_gbq(output_file)
+            df = pandas.DataFrame.from_dict(article_content)
+            print(type(df))
+            pandas_gbq.to_gbq(df, 'my_dataset.my_table', project_id=args.project_id, if_exists="append")
         except Exception as e:
             print(e)
 
