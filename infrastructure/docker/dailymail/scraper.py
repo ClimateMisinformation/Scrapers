@@ -63,8 +63,8 @@ class Tool:
         return f'({self.domain_url}, {self.project_id}, {self.subscription_id},{self.timeout})'
 
 
-    @staticmethod
-    def collect_urls(domain_url) -> list:
+    # @staticmethod
+    def collect_urls(self) -> list:
         """
            Mocks a browser to go to a news website containing links to articles and collects article URLs which
            it returns as a list.
@@ -84,7 +84,7 @@ class Tool:
         config = Config()
         config.browser_user_agent = user_agent
         config.request_timeout = 10
-        paper = newspaper.build(domain_url, config=config, memoize_articles=False, language='en')
+        paper = newspaper.build(self.domain_url, config=config, memoize_articles=False, language='en')
 
         try:
             for this_article in paper.articles:
@@ -97,7 +97,7 @@ class Tool:
         return current_urls
 
     @staticmethod
-    def filter_urls(self, url_to_check, domain_url) -> bool:
+    def filter_urls( url_to_check, domain_url) -> bool:
         """ Filters the URLs collected so that  only those  from base_url domain
             are kept. In-page html links '#' are removed.
 
@@ -399,10 +399,10 @@ if __name__ == "__main__":
     """
     try:
         tool = Tool(search_url,"linux-academy-project-91522", "hello_topic-sub")
-        urls = tool.collect_urls(search_url)
+        urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url, search_url)]
-        print(f'The menu displayed on URL {search_url} leads to  { len(filtered_urls) } articles  to scrape')
+        print(f'After filtering {search_url} there are  { len(filtered_urls) } articles')
     except Exception as e:
         print(e)
 
