@@ -32,7 +32,7 @@ def publish(messages):
     print(f"Published messages to {topic_path}")
 
 
-def scrape(req):
+def scrapenews(req):
     filtered_urls = []
     request_json = req.get_json(silent=True)
     request_args = req.args
@@ -52,7 +52,7 @@ def scrape(req):
     config.request_timeout = 10
 
     try:
-        urls = Tools.extract_urls(search_url)
+        urls = Tools.collect_urls(search_url)
         filtered_urls = [
             url for url in urls if Tools.filter_urls(url, search_url)
         ]
@@ -120,5 +120,5 @@ if __name__ == "__main__":
 
 
     # option 2
-    app.add_url_rule('/scrape', 'scrape', scrape, methods=['POST', 'GET'], defaults={'request': request})
+    app.add_url_rule('/scrape', 'scrape', scrapenews, methods=['POST', 'GET'], defaults={'request': request})
     app.run(host='127.0.0.1', port=8088, debug=True)
