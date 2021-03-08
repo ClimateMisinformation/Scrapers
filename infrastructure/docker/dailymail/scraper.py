@@ -15,6 +15,7 @@
 """
 import requests
 import pandas
+import pandas_gbq
 import re
 import argparse
 import os
@@ -50,20 +51,18 @@ from google.cloud import pubsub_v1
 
 
 class Tool:
-    def __init__(self, domain_url, project_id=None, subscription_id=None, timeout=None ):
+    def __init__(self, domain_url, project_id=None, topic_id=None, timeout=10 ):
         self.domain_url = domain_url
         self.project_id = project_id
-        self.subscription_id = subscription_id
+        self.topic_id = topic_id
         self.timeout = timeout
 
     def __repr__(self):
-        return f'Tool("{self.domain_url}", "{self.project_id}", "{self.subscription_id}",{self.timeout})'
+        return f'Tool("{self.domain_url}", "{self.project_id}", "{self.topic_id}",{self.timeout})'
 
     def __str__(self):
-        return f'({self.domain_url}, {self.project_id}, {self.subscription_id},{self.timeout})'
+        return f'({self.domain_url}, {self.project_id}, {self.topic_id},{self.timeout})'
 
-
-    # @staticmethod
     def collect_urls(self) -> list:
         """
            Mocks a browser to go to a news website containing links to articles and collects article URLs which
@@ -71,7 +70,7 @@ class Tool:
 
            Parameters
            ----------
-            domain_url: string
+           self.domain_url: string
                 The domain url of a news source. For example bbc.co.uk
 
            @Returns A list of URL to articles
@@ -96,23 +95,24 @@ class Tool:
 
         return current_urls
 
-    @staticmethod
-    def filter_urls( url_to_check, domain_url) -> bool:
+
+    def filter_urls(self, url_to_check) -> bool:
         """ Filters the URLs collected so that  only those  from base_url domain
             are kept. In-page html links '#' are removed.
 
             Parameters
             ----------
-            url_to_check:  string
-                The url which will be compared to the root
-            domain_url:  string
+            self
+            self.domain_url: string
                 The  root url  of the website we  are  searching
+
+            url_to_check: string
+                The url which will be compared to the root
 
             @Returns: bool
                 True  if URL is valid.
-
         """
-        if domain_url in url_to_check and '#' not in url_to_check:
+        if self.domain_url in url_to_check and '#' not in url_to_check:
             return True
         else:
             return False
@@ -134,8 +134,7 @@ class Tool:
         else:
             return True
 
-    @staticmethod
-    def subscribe_to_urls_topic(project_id, subscription_id, timeout=None) -> list:
+    def subscribe_to_urls_topic(self, timeout=None) -> list:
         """Receives messages from a google pub/sub topic containing URLS strings from
         a given Pub/Sub subscription and appends them to a list
         which is then returned,
@@ -143,11 +142,11 @@ class Tool:
         Parameters
         ----------
 
-        project_id : string
+        self.project_id : string
             The google project id where the topic is located
-        subscription_id : string
+        self.topic_id : string
             The google topic subscription  with the  URLs.
-        timeout: int
+        self.timeout: int
             The time (s) how long the  program will run for
 
          @Returns list
@@ -158,16 +157,17 @@ class Tool:
         # Initialize a Subscriber client
         subscriber_client = pubsub_v1.SubscriberClient()
         # Create a fully qualified identifier in the form of
-        # `projects/{project_id}/subscriptions/{subscription_id}`
-        subscription_path = subscriber_client.subscription_path(project_id, subscription_id)
+        # `projects/{project_id}/subscriptions/{topic_id}-sub`
+        subscription_path = subscriber_client.subscription_path(self.project_id, self.topic_id+'-sub')
 
         def callback(message):
-            print(f"Received {message}.")
-            print(message.data)
+            #print(f"Received {message}.")
+            #print(message.data)
             _urls.append(message.data.decode("utf-8"))
+            print(len(_urls))
             # Acknowledge the message. Unack'ed messages will be redelivered.
             # message.ack()
-            print(f" Not Acknowledged {message.message_id}.")
+            # print(f" Not Acknowledged {message.message_id}.")
 
         streaming_pull_future = subscriber_client.subscribe(
             subscription_path, callback=callback
@@ -182,17 +182,17 @@ class Tool:
             streaming_pull_future.cancel()
 
         subscriber_client.close()
+        print(len(_urls))
         return _urls
 
-
     @staticmethod
-    def collect_articles(_article_urls) -> dict:
+    def collect_articles(self, _article_urls) -> dict:
         """ Configures newspaper user agent used to scrape the news-sources. Then receives scrapes the article URLs
         from that  news-source and returns a dict with each row  being an article.
 
         Parameters
         ----------
-        article_urls:  list
+        self.article_urls:  list
             a list  of URLS linking to articles
 
         @Returns dict
@@ -260,8 +260,7 @@ class Tool:
         """
         return
 
-    @staticmethod
-    def publish_article_to_bigquery(articles_gbq):
+    def publish_article_to_bigquery(self, articles_gbq):
         """ Publishes the  collected article  to a google big query table. The table must  already exist and
         account authentication be setup.
 
@@ -277,24 +276,22 @@ class Tool:
         try:
             df = pandas.DataFrame.from_dict(articles_gbq)
             print(type(df))
-            pandas_gbq.to_gbq(df, 'my_dataset.my_table', project_id=args.project_id, if_exists="append")
+            pandas_gbq.to_gbq(df, 'my_dataset.my_table', project_id=self.project_id, if_exists="append")
         except Exception as e:
             print(e)
         return
 
+    def pub(self, content):
 
-    @staticmethod
-    def pub(project_id, topic_id, content):
-
-        """ Publishes the  a single url to a google pub/sub topic. The topic must  already  exist and
+        """ Publishes a single url to a google pub/sub topic. The topic must  already  exist and
         account authentication be setup
 
         Parameters
         ----------
 
-        project_id : string
+        self.project_id : string
             The google project id where the topic is located
-        subscription_id : string
+        self.topic_id : string
             The google topic subscription  with the  URLs.
         content: bytearray
             The content  of  the message
@@ -306,9 +303,9 @@ class Tool:
         # Initialize a Publisher client.
         client = pubsub_v1.PublisherClient()
         # Create a fully qualified identifier of form `projects/{project_id}/topics/{topic_id}`
-        topic_path = client.topic_path(project_id, topic_id)
+        topic_path = client.topic_path(self.project_id, self.topic_id)
 
-        # Data sent to Cloud Pub/Sub must be a bytestring.
+        # Data sent to Cloud Pub/Sub must be a byte string.
         data = bytes(content, 'UTF8')
 
         # Publish a message, the client returns a future.
@@ -317,18 +314,17 @@ class Tool:
         print(f"Published {data} to {topic_path}: {message_id}")
         return
 
-    @staticmethod
-    def publish_urls_to_topic(project_id, topic_id, url_list):
+    def publish_urls_to_topic(self, url_list):
 
-        """ Publishes the  collected article urls to a google pub/sub topic. The topic must  already  exist and
+        """ Publishes the list of collected article urls to a google pub/sub topic. The topic must  already  exist and
         account authentication be setup
 
         Parameters
         ----------
 
-        project_id : string
+        self.project_id : string
             The google project id where the topic is located
-        subscription_id : string
+        self.topic_id : string
             The google topic subscription  with the  URLs.
         url_list: list
             The urls to store
@@ -337,12 +333,8 @@ class Tool:
         """
 
         for url in url_list:
-            pub(project_id, topic_id, url)
-
+            self.pub(url)
         return
-
-
-
 
 
 if __name__ == "__main__":
