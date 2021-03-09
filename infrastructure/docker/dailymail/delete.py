@@ -33,7 +33,7 @@ def scrapeurls(request_body):
         search_url = 'https://www.dailymail.co.uk/'
 
     try:
-        tool = Tool(search_url, "linux-academy-project-91522", "hello_topic")
+        tool = Tool(search_url, "linux-academy-project-91522", "hello_topic", "my_dataset", "my_table2")
         urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url)]

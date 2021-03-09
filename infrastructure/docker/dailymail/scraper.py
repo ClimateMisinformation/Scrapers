@@ -52,10 +52,12 @@ from pandas_gbq import schema
 
 
 class Tool:
-    def __init__(self, domain_url, project_id=None, topic_id=None, timeout=10 ):
+    def __init__(self, domain_url, project_id=None, topic_id=None, dataset=None, table=None, timeout=10 ):
         self.domain_url = domain_url
         self.project_id = project_id
         self.topic_id = topic_id
+        self.dataset = dataset
+        self.table = table
         self.timeout = timeout
         self.urls = []
 
@@ -214,7 +216,6 @@ class Tool:
             'text': [],
         }
 
-        # field_names = ['url', 'title', 'author',  'date', 'tags', 'text']
 
         for url_i, url in enumerate(self.urls):
             # print(url)
@@ -226,7 +227,6 @@ class Tool:
                 continue
 
             try:
-                # soup = BeautifulSoup(article.html, 'html.parser')
                 article.parse()
 
             except Exception as e:
