@@ -24,6 +24,7 @@ from newspaper import Config
 from newspaper import Article
 from newspaper.utils import BeautifulSoup
 from google.cloud import pubsub_v1
+from pandas_gbq import schema
 
 """ 
     When run as  main script, this script scrapes the URL passed as arg[0] for news articles. 
@@ -56,6 +57,7 @@ class Tool:
         self.project_id = project_id
         self.topic_id = topic_id
         self.timeout = timeout
+        self.urls = []
 
     def __repr__(self):
         return f'Tool("{self.domain_url}", "{self.project_id}", "{self.topic_id}",{self.timeout})'
@@ -134,7 +136,7 @@ class Tool:
         else:
             return True
 
-    def subscribe_to_urls_topic(self, timeout=None) -> list:
+    def subscribe_to_urls_topic(self, timeout=2) -> list:
         """Receives messages from a google pub/sub topic containing URLS strings from
         a given Pub/Sub subscription and appends them to a list
         which is then returned,
@@ -162,12 +164,13 @@ class Tool:
 
         def callback(message):
             #print(f"Received {message}.")
-            #print(message.data)
-            _urls.append(message.data.decode("utf-8"))
-            print(len(_urls))
+            print(message.data)
+            self.urls.append(message.data.decode("utf-8"))
+            print(len(self.urls))
             # Acknowledge the message. Unack'ed messages will be redelivered.
             # message.ack()
             # print(f" Not Acknowledged {message.message_id}.")
+
 
         streaming_pull_future = subscriber_client.subscribe(
             subscription_path, callback=callback
@@ -182,11 +185,10 @@ class Tool:
             streaming_pull_future.cancel()
 
         subscriber_client.close()
-        print(len(_urls))
-        return _urls
+        print(len(self.urls))
+        return self.urls
 
-    @staticmethod
-    def collect_articles(self, _article_urls) -> dict:
+    def collect_articles(self) -> dict:
         """ Configures newspaper user agent used to scrape the news-sources. Then receives scrapes the article URLs
         from that  news-source and returns a dict with each row  being an article.
 
@@ -214,17 +216,16 @@ class Tool:
 
         # field_names = ['url', 'title', 'author',  'date', 'tags', 'text']
 
-        for url_i, url in enumerate(_article_urls):
+        for url_i, url in enumerate(self.urls):
             # print(url)
             try:
-                bq_article = newspaper.Article(url)
-                bq_article.download()
+                article = newspaper.Article(url)
+                article.download()
             except Exception as e:
                 print(e)
                 continue
 
             try:
-                # might not need this
                 # soup = BeautifulSoup(article.html, 'html.parser')
                 article.parse()
 
@@ -274,9 +275,9 @@ class Tool:
         """
 
         try:
-            df = pandas.DataFrame.from_dict(articles_gbq)
+            df = pandas.DataFrame.from_dict(articles_gbq, orient='columns')
             print(type(df))
-            pandas_gbq.to_gbq(df, 'my_dataset.my_table', project_id=self.project_id, if_exists="append")
+            pandas_gbq.to_gbq(df, 'my_dataset.my_table2', chunksize=5, project_id=self.project_id, if_exists="replace")
         except Exception as e:
             print(e)
         return
@@ -335,6 +336,33 @@ class Tool:
         for url in url_list:
             self.pub(url)
         return
+
+    def generate_bq_schema(df, default_type='STRING'):
+        """ Given a passed df, generate the associated Google BigQuery schema.
+        Parameters
+        ----------
+        df : DataFrame
+        default_type : string
+            The default big query type in case the type of the column
+            does not exist in the schema.
+        """
+
+        type_mapping = {
+            'i': 'INTEGER',
+            'b': 'BOOLEAN',
+            'f': 'FLOAT',
+            'O': 'STRING',
+            'S': 'STRING',
+            'U': 'STRING',
+            'M': 'TIMESTAMP'
+        }
+
+        fields = []
+        for column_name, dtype in df.dtypes.iteritems():
+            fields.append({'name': column_name,
+                           'type': type_mapping.get(dtype.kind, default_type)})
+
+        return {'fields': fields}
 
 
 if __name__ == "__main__":

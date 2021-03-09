@@ -16,12 +16,12 @@
 
 import argparse
 import os
-from scraper import Tools
+from scraper import Tool
 from google.cloud import pubsub_v1
 from newspaper import Article
 import pandas
 import pandas_gbq
-
+from pandas_gbq import schema
 
 if __name__ == "__main__":
     url_list = []
@@ -35,15 +35,13 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    url_list = Tools.subscribe_to_url_topic(args.project_id, args.subscription_id, args.timeout)
+    tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic")
+    url_list = tool.subscribe_to_urls_topic()
 
-    try:
-        filtered_urls = [
-            url for url in url_list if Tools.filter_urls(url, "https://www.dailymail.co.uk/")]
-    except Exception as e:
-        print(e)
+    filtered_urls = [
+        url for url in url_list if tool.filter_urls(url)]
 
-    print(f'From the topic  {args.subscription_id } were  grabbed  {len(filtered_urls)} articles  to scrape')
+    print(f'From the topic  {args.subscription_id} were  grabbed  {len(filtered_urls)} articles  to scrape')
 
     for url in filtered_urls:
 
@@ -84,8 +82,9 @@ if __name__ == "__main__":
 
         try:
             df = pandas.DataFrame.from_dict(article_content)
-            print(type(df))
-            pandas_gbq.to_gbq(df, 'my_dataset.my_table', project_id=args.project_id, if_exists="append")
+            # print(schema.generate_bq_schema(df))
+            pandas_gbq.to_gbq(df, 'my_dataset.my_table2', project_id=args.project_id, if_exists="append", table_schema
+            = [{'name': 'url', 'type': 'STRING'}, {'name': 'title', 'type': 'STRING'}, {'name': 'author', 'type': 'STRING'}, {'name': 'date', 'type': 'TIMESTAMP'}, {'name': 'tags', 'type': 'STRING'}, {'name': 'text', 'type': 'STRING'}])
         except Exception as e:
             print(e)
 

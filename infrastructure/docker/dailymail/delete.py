@@ -47,17 +47,16 @@ def scrapeurls(request_body):
 
 
 def publisharticles():
-    urls = []
+
     tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic")
     try:
-        urls = tool.subscribe_to_urls_topic()
-        tool.collect_articles(urls)
+        tool.subscribe_to_urls_topic()
     except Exception as e:
         print(e)
-    try:
-        tool.publish_article_to_bigquery(urls)
-    except Exception as e:
-        print(e)
+
+    mydict = tool.collect_articles()
+    tool.publish_article_to_bigquery(mydict)
+
 
     return 'Published Articles'
 
@@ -73,5 +72,5 @@ if __name__ == "__main__":
 
     # option 2
     app.add_url_rule('/scrapeurls', 'scrapeurls', scrapeurls, methods=['POST', 'GET'], defaults={'request': request})
-    app.add_url_rule('/publisharticles', 'publisharticles', publisharticles, methods=['POST', 'GET'] )
+    app.add_url_rule('/publisharticles', 'publisharticles', publisharticles, methods=['POST', 'GET'])
     app.run(host='127.0.0.1', port=8088, debug=True)
