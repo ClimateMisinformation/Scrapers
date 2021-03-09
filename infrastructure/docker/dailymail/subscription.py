@@ -58,7 +58,7 @@ if __name__ == "__main__":
             'text': [],
         }
 
-        # field_names = ['url', 'title', 'author', 'date', 'tags', 'text']
+
         try:
             article = Article(url)
             article.download()
