@@ -35,7 +35,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic")
+    tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic", gbq_dataset='my_dataset'
+                , gbq_table='.my_table2')
     url_list = tool.subscribe_to_urls_topic()
 
     filtered_urls = [
@@ -82,7 +83,6 @@ if __name__ == "__main__":
 
         try:
             df = pandas.DataFrame.from_dict(article_content)
-            # print(schema.generate_bq_schema(df))
             pandas_gbq.to_gbq(df, 'my_dataset.my_table2', project_id=args.project_id, if_exists="append", table_schema
             = [{'name': 'url', 'type': 'STRING'}, {'name': 'title', 'type': 'STRING'}, {'name': 'author', 'type': 'STRING'}, {'name': 'date', 'type': 'TIMESTAMP'}, {'name': 'tags', 'type': 'STRING'}, {'name': 'text', 'type': 'STRING'}])
         except Exception as e:

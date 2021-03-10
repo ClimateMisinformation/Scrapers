@@ -12,30 +12,25 @@
 # limitations under the License.
 
 
-from scraper import Tools
+from scraper import Tool
 from flask import Flask, request, escape
 from google.cloud import pubsub_v1
 from newspaper import Config
 from newspaper import Article
+import pandas
+"""
+This  script  runs a  local server and  exposes two  URLs
 
+http://127.0.0.1:8088/scrapeurls  scrapes article URLs from website  and publishes to google topic
 
-def publish(messages):
-    project_id = "linux-academy-project-91522"
-    topic_name = "hello_topic"
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_name)
-    # print(messages)
-    for message in messages:
-        data = message.encode('utf-8')
-        future = publisher.publish(topic_path, data)
-        #print(future.result())
-    print(f"Published messages to {topic_path}")
+http://127.0.0.1:8088/publisharticles  subscribes to publishes 
 
+"""
 
-def scrapenews(req):
-    filtered_urls = []
-    request_json = req.get_json(silent=True)
-    request_args = req.args
+def scrapeurls(request=request):
+
+    request_json = request.get_json(silent=True)
+    request_args = request.args
 
     if request_json and 'url' in request_json:
         search_url = request_json['url']
@@ -44,70 +39,35 @@ def scrapenews(req):
     else:
         search_url = 'https://www.dailymail.co.uk/'
 
-    """ Configure newspaper user agent
-    """
-    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
-    config = Config()
-    config.browser_user_agent = user_agent
-    config.request_timeout = 10
-
     try:
-        urls = Tools.collect_urls(search_url)
+        tool = Tool(search_url, "eng-lightning-244220", "dailymail-urls",
+                    gbq_dataset='my_dataset'
+                    , gbq_table='.my_table2')
+        urls = tool.collect_urls()
         filtered_urls = [
-            url for url in urls if Tools.filter_urls(url, search_url)
-        ]
-        print(f'The menu displayed on URL {search_url} leads to  {len(filtered_urls)} articles  to scrape')
+            url for url in urls if tool.filter_urls(url)]
+        print(f'After filtering {search_url} there are  {len(filtered_urls)} articles')
     except Exception as e:
         print(e)
-    publish(filtered_urls)
+
+    tool.publish_urls_to_topic(filtered_urls)
+
     return 'Scraped URLS'
 
 
-def export(filtered_urls):
+def publisharticles():
 
-    article_content = {
-        'url': [],
-        'title': [],
-        'author': [],
-        'date': [],
-        'tags': [],
-        'text': [],
-        }
+    tool = Tool('https://www.dailymail.co.uk/', "eng-lightning-244220", "dailymail-urls")
+    try:
+        tool.subscribe_to_urls_topic()
+    except Exception as e:
+        print(e)
 
-    for url_index, url in enumerate(filtered_urls):
-        print(url)
-        try:
-            article = newspaper.Article(url)
-            article.download()
-        except Exception as e:
-            print(e)
-            continue
+    mydict = tool.collect_articles()
+    tool.publish_article_to_bigquery(mydict)
 
-        try:
-            article.parse()
-        except Exception as e:
-            print(e)
 
-        try:
-            article_content['url'].append(article.url)
-            article_content['title'].append(article.title)
-            article_content['author'].append(article.authors)
-            article_content['date'].append(article.publish_date)
-            article_content['tags'].append('')
-            article_content['text'].append(article.text.replace("\n", " ").replace(",", " "))
-        except AttributeError as e:
-            print(e)
-            continue
-        except Exception as e:
-            print(e)
-
-        try:
-            pandas.DataFrame.from_dict(article_content).to_csv(outputfile, index=False)
-        except Exception as e:
-            print(e)
-
-    return 'Saved articles '
-    # return 'Saved articles from '.format(escape(search_url))
+    return 'Published Articles'
 
 
 if __name__ == "__main__":
@@ -116,9 +76,10 @@ if __name__ == "__main__":
     @app.route('/', methods=['POST', 'GET'])
     def default():
         return
-        #return scrape(request)
+        #return scrapenews(request)
 
 
     # option 2
-    app.add_url_rule('/scrape', 'scrape', scrapenews, methods=['POST', 'GET'], defaults={'request': request})
+    app.add_url_rule('/scrapeurls', 'scrapeurls', scrapeurls, methods=['POST', 'GET'], defaults={'request': request})
+    app.add_url_rule('/publisharticles', 'publisharticles', publisharticles, methods=['POST', 'GET'])
     app.run(host='127.0.0.1', port=8088, debug=True)
