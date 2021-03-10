@@ -52,20 +52,20 @@ from pandas_gbq import schema
 
 
 class Tool:
-    def __init__(self, domain_url, project_id=None, topic_id=None, dataset=None, table=None, timeout=10 ):
-        self.domain_url = domain_url
-        self.project_id = project_id
-        self.topic_id = topic_id
-        self.dataset = dataset
-        self.table = table
-        self.timeout = timeout
+    def __init__(self, domain_url, project_id=None, gps_topic_id=None, gbq_dataset=None, gbq_table=None, timeout=10):
+        self.domain_url = domain_url     # The domain to scrape
+        self.project_id = project_id     # The google project URL
+        self.gps_topic_id = gps_topic_id # The google pub/sub topic id
+        self.gbq_dataset = gbq_dataset   # The google big query dataset
+        self.gbq_table = gbq_table       # The  google big query table
+        self.timeout = timeout           # The time the subscribe call back runs for
         self.urls = []
 
     def __repr__(self):
-        return f'Tool("{self.domain_url}", "{self.project_id}", "{self.topic_id}",{self.timeout})'
+        return f'Tool("{self.domain_url}", "{self.project_id}", "{self.gps_topic_id}",{self.timeout})'
 
     def __str__(self):
-        return f'({self.domain_url}, {self.project_id}, {self.topic_id},{self.timeout})'
+        return f'({self.domain_url}, {self.project_id}, {self.gps_topic_id},{self.timeout})'
 
     def collect_urls(self) -> list:
         """
@@ -148,7 +148,7 @@ class Tool:
 
         self.project_id : string
             The google project id where the topic is located
-        self.topic_id : string
+        self.gps_topic_id : string
             The google topic subscription  with the  URLs.
         self.timeout: int
             The time (s) how long the  program will run for
@@ -162,7 +162,7 @@ class Tool:
         subscriber_client = pubsub_v1.SubscriberClient()
         # Create a fully qualified identifier in the form of
         # `projects/{project_id}/subscriptions/{topic_id}-sub`
-        subscription_path = subscriber_client.subscription_path(self.project_id, self.topic_id+'-sub')
+        subscription_path = subscriber_client.subscription_path(self.project_id, self.gps_topic_id +'-sub')
 
         def callback(message):
             #print(f"Received {message}.")
@@ -187,7 +187,6 @@ class Tool:
             streaming_pull_future.cancel()
 
         subscriber_client.close()
-        print(len(self.urls))
         return self.urls
 
     def collect_articles(self) -> dict:
@@ -276,8 +275,7 @@ class Tool:
 
         try:
             df = pandas.DataFrame.from_dict(articles_gbq, orient='columns')
-            print(type(df))
-            pandas_gbq.to_gbq(df, 'my_dataset.my_table2', chunksize=5, project_id=self.project_id, if_exists="replace")
+            pandas_gbq.to_gbq(df, 'my_dataset.my_table2', chunksize=5, project_id=self.project_id, if_exists="append")
         except Exception as e:
             print(e)
         return
@@ -292,7 +290,7 @@ class Tool:
 
         self.project_id : string
             The google project id where the topic is located
-        self.topic_id : string
+        self.gps_topic_id : string
             The google topic subscription  with the  URLs.
         content: bytearray
             The content  of  the message
@@ -304,7 +302,7 @@ class Tool:
         # Initialize a Publisher client.
         client = pubsub_v1.PublisherClient()
         # Create a fully qualified identifier of form `projects/{project_id}/topics/{topic_id}`
-        topic_path = client.topic_path(self.project_id, self.topic_id)
+        topic_path = client.topic_path(self.project_id, self.gps_topic_id)
 
         # Data sent to Cloud Pub/Sub must be a byte string.
         data = bytes(content, 'UTF8')
@@ -325,7 +323,7 @@ class Tool:
 
         self.project_id : string
             The google project id where the topic is located
-        self.topic_id : string
+        self.gps_topic_id : string
             The google topic subscription  with the  URLs.
         url_list: list
             The urls to store
@@ -421,7 +419,7 @@ if __name__ == "__main__":
         tool = Tool(search_url,"linux-academy-project-91522", "hello_topic-sub")
         urls = tool.collect_urls()
         filtered_urls = [
-            url for url in urls if tool.filter_urls(url, search_url)]
+            url for url in urls if tool.filter_urls(url)]
         print(f'After filtering {search_url} there are  { len(filtered_urls) } articles')
     except Exception as e:
         print(e)
