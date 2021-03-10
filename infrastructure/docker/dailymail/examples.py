@@ -18,12 +18,19 @@ from google.cloud import pubsub_v1
 from newspaper import Config
 from newspaper import Article
 import pandas
+"""
+This  script  runs a  local server and  exposes two  URLs
 
+http://127.0.0.1:8088/scrapeurls  scrapes article URLs from website  and publishes to google topic
 
-def scrapeurls(request_body):
+http://127.0.0.1:8088/publisharticles  subscribes to publishes 
 
-    request_json = request_body.get_json(silent=True)
-    request_args = request_body.args
+"""
+
+def scrapeurls(request=request):
+
+    request_json = request.get_json(silent=True)
+    request_args = request.args
 
     if request_json and 'url' in request_json:
         search_url = request_json['url']
@@ -33,7 +40,9 @@ def scrapeurls(request_body):
         search_url = 'https://www.dailymail.co.uk/'
 
     try:
-        tool = Tool(search_url, "linux-academy-project-91522", "hello_topic", "my_dataset", "my_table2")
+        tool = Tool(search_url, "linux-academy-project-91522", "hello_topic",
+                    gbq_dataset='my_dataset'
+                    , gbq_table='.my_table2')
         urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url)]
