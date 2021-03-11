@@ -8,10 +8,12 @@ content is then published to either a csv file , a JSON file or Google Big Query
 
 ## Prerequisites
 - A Google account
+- Python 3
+- Pip3
 
 
 ## Usage
-Goto  https://console.cloud.google.com  and select a project. In this example the project  is called "project-id: eng-lightning-244220" 
+Go to  https://console.cloud.google.com  and select a project. In this example the project  is called "project-id: eng-lightning-244220" 
 
 ### Create a topic 
 - projects/eng-lightning-244220/topics/dailymail-urls
@@ -24,7 +26,7 @@ Go to https://console.cloud.google.com/bigquery?project=eng-lightning-244220 and
 datatable in this example is called "CollectedURLs". Its URL is https://console.cloud.google.com/bigquery?project=eng-lightning-244220&p=eng-lightning-244220&page=dataset&d=CollectedURLs
 
 ### Create a schema for the data table
-The schema would be:
+The schema for the article is :
 
     'name': 'url', 'type': 'STRING'
     'name': 'title', 'type': 'STRING'
@@ -32,6 +34,10 @@ The schema would be:
     'name': 'date', 'type': 'TIMESTAMP'
     'name': 'tags', 'type': 'STRING'
     'name': 'text', 'type': 'STRING' 
+
+If you try an import dataframes with a different schema the import fails.
+with the message "Please verify that the structure and data types in the DataFrame match the schema of the destination table."
+This can also appear  if no data is  present in the dataframe.
 
 ### Use the tool
 

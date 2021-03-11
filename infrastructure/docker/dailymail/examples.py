@@ -40,7 +40,10 @@ def scrapeurls(request=request):
         search_url = 'https://www.dailymail.co.uk/'
 
     try:
-        tool = Tool(search_url, "linux-academy-project-91522", "hello_topic",
+        #tool = Tool(search_url, "eng-lightning-244220", "dailymail-urls",
+        #            gbq_dataset='CollectedURLs'
+        #            , gbq_table='my_table')
+        tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic",
                     gbq_dataset='my_dataset'
                     , gbq_table='.my_table2')
         urls = tool.collect_urls()
@@ -57,7 +60,11 @@ def scrapeurls(request=request):
 
 def publisharticles():
 
-    tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic")
+    #tool = Tool('https://www.dailymail.co.uk/', "eng-lightning-244220", "dailymail-urls", gbq_dataset='CollectedURLs'
+    #             , gbq_table='my_table')
+    tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic", gbq_dataset='my_dataset'
+                , gbq_table='.my_table2')
+
     try:
         tool.subscribe_to_urls_topic()
     except Exception as e:
