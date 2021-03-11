@@ -19,7 +19,6 @@ import argparse
 import os
 import newspaper
 from newspaper import Config
-# from newspaper import Article
 from newspaper.utils import BeautifulSoup
 from google.cloud import pubsub_v1
 # from pandas_gbq import schema
@@ -97,7 +96,6 @@ class Tool:
 
         return current_urls
 
-
     def filter_urls(self, url_to_check) -> bool:
         """ Filters the URLs collected so that  only those  from base_url domain
             are kept. In-page html links '#' are removed.
@@ -163,14 +161,13 @@ class Tool:
         subscription_path = subscriber_client.subscription_path(self.project_id, self.gps_topic_id +'-sub')
 
         def callback(message):
-            #print(f"Received {message}.")
+            # print(f"Received {message}.")
             print(message.data)
             self.urls.append(message.data.decode("utf-8"))
             print(len(self.urls))
             # Acknowledge the message. Unack'ed messages will be redelivered.
             # message.ack()
             # print(f" Not Acknowledged {message.message_id}.")
-
 
         streaming_pull_future = subscriber_client.subscribe(
             subscription_path, callback=callback
@@ -188,8 +185,8 @@ class Tool:
         return self.urls
 
     def collect_articles(self) -> dict:
-        """ Configures newspaper user agent used to scrape the news-sources. Then receives scrapes the article URLs
-        from that  news-source and returns a dict with each row  being an article.
+        """ Configures newspaper user agent used to scrape the news-sources. Then receives scrapes the thearticle URLs
+        from that  news-source and returns a dict with each row  being an thearticle.
 
         Parameters
         ----------
@@ -213,36 +210,34 @@ class Tool:
             'text': [],
         }
 
-
         for url_i, url in enumerate(self.urls):
             # print(url)
             try:
-                article = newspaper.Article(url)
-                article.download()
+                thearticle = newspaper.Article(url)
+                thearticle.download()
             except Exception as e:
                 print(e)
                 continue
 
             try:
-                article.parse()
+                thearticle.parse()
 
             except Exception as e:
                 print(e)
 
             try:
-                articles_content['url'].append(article.url)
-                articles_content['title'].append(article.title)
-                articles_content['author'].append(article.authors)
-                articles_content['date'].append(article.publish_date)
+                articles_content['url'].append(thearticle.url)
+                articles_content['title'].append(thearticle.title)
+                articles_content['author'].append(thearticle.authors)
+                articles_content['date'].append(thearticle.publish_date)
                 articles_content['tags'].append('')
-                articles_content['text'].append(article.text.replace("\n", " ").replace(",", " "))
+                articles_content['text'].append(thearticle.text.replace("\n", " ").replace(",", " "))
             except AttributeError as e:
                 print(e)
                 continue
             except Exception as e:
                 print(e)
         return articles_content
-
 
     @staticmethod
     def publish_articles_to_topic():
@@ -270,7 +265,7 @@ class Tool:
         @Returns  None
 
         """
-        dataset_and_table = self.gbq_dataset + self.gbq_table
+        dataset_and_table = self.gbq_dataset + '.' + self.gbq_table
         try:
             df = pandas.DataFrame.from_dict(articles_gbq, orient='columns')
             pandas_gbq.to_gbq(df, dataset_and_table, chunksize=5, project_id=self.project_id, if_exists="append")
@@ -303,7 +298,7 @@ class Tool:
         topic_path = client.topic_path(self.project_id, self.gps_topic_id)
 
         # Data sent to Cloud Pub/Sub must be a byte string.
-        data = bytes(content, 'UTF8')
+        data = bytes(str(content), 'UTF8')
 
         # Publish a message, the client returns a future.
         api_future = client.publish(topic_path, data)
@@ -431,9 +426,6 @@ if __name__ == "__main__":
             'text': [],
         }
 
-    # field_names = ['url', 'title', 'author',  'date', 'tags', 'text']
-
-
     for url_index, url in enumerate(filtered_urls):
         # print(url)
         try:
@@ -444,7 +436,6 @@ if __name__ == "__main__":
             continue
 
         try:
-            #  might not need this
             article.parse()
             soup = BeautifulSoup(article.html, 'html.parser')
         except Exception as e:

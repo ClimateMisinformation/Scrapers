@@ -10,23 +10,23 @@ content is then published to either a csv file , a JSON file or Google Big Query
 - A Google account
 - Python 3
 - Pip3
-
+- Google Services authentication
 
 ## Usage
-Go to  https://console.cloud.google.com  and select a project. In this example the project  is called "project-id: eng-lightning-244220" 
+Go to  https://console.cloud.google.com  and select a project. In this example the project  is called "project-id: linux-academy-project-91522" 
 
 ### Create a topic 
-- projects/eng-lightning-244220/topics/dailymail-urls
+- projects/linux-academy-project-91522/topics/hello_topic
 
 ### Create a subscription
-- projects/eng-lightning-244220/subscriptions/dailymail-urls-sub 
+- projects/linux-academy-project-91522/subscriptions/hello_topic-sub 
 
-### Create a datatable
-Go to https://console.cloud.google.com/bigquery?project=eng-lightning-244220 and create a datatable. The
-datatable in this example is called "CollectedURLs". Its URL is https://console.cloud.google.com/bigquery?project=eng-lightning-244220&p=eng-lightning-244220&page=dataset&d=CollectedURLs
+### Create a dataset and table
+Go to https://console.cloud.google.com/bigquery?project=linux-academy-project-91522 and create a datatable. The
+dataset in this example is called "my_dataset ". Its URL is https://console.cloud.google.com/bigquery?project=linux-academy-project-91522&p=linux-academy-project-91522&page=dataset&d=my_dataset 
 
 ### Create a schema for the data table
-The schema for the article is :
+In this example the data table is called my_table. The schema for the table, so each article is :
 
     'name': 'url', 'type': 'STRING'
     'name': 'title', 'type': 'STRING'
@@ -43,7 +43,8 @@ This can also appear  if no data is  present in the dataframe.
 
 1. Initialize  the tool 
 
-        tool = Tool("https://www.dailymail.co.uk/", "project=eng-lightning-244220", "dailymail-urls")
+        tool = Tool(domain_url='https://www.dailymail.co.uk/', project_id="linux-academy-project-91522", gps_topic_id="hello_topic", 
+    gbq_dataset='my_dataset', gbq_table='my_table')
 
 2. Scrape the  URLs from the  news site and filter them    
 
@@ -67,4 +68,33 @@ This can also appear  if no data is  present in the dataframe.
         tool.publish_article_to_bigquery(mydict)
 
 
-## Examples
+## Quick start
+
+Install  the requirements using pip
+    
+    pip install requirements
+
+Manually create a google project, a pub/sub topic, a big query dataset, a big query table 
+    
+    https://console.cloud.google.com/
+
+Configure  the tool in the examples file to match your project
+
+    tool = Tool(domain_url='https://www.dailymail.co.uk/', project_id="linux-academy-project-91522", gps_topic_id="hello_topic", 
+    gbq_dataset='my_dataset', gbq_table='my_table')
+
+
+Run the examples.py file  
+
+    python examples.py
+    
+Go to http://127.0.0.1:8088/scrapeurls  a HTTP GET will cause the domain to be scraped for article urls and these added
+to the topic you created. 
+
+Go to http://127.0.0.1:8088/publisharticles a HTTP GET will subscribe to the topic  get the articles content and publish
+ it to the Big Query database you created.
+ 
+In my case this is visible at  
+https://console.cloud.google.com/bigquery?project=linux-academy-project-91522&d=my_dataset&p=linux-academy-project-91522&page=dataset
+ 
+   
