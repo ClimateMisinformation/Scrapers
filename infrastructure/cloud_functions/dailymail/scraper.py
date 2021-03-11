@@ -13,18 +13,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-import requests
 import pandas
 import pandas_gbq
-import re
 import argparse
 import os
 import newspaper
 from newspaper import Config
-from newspaper import Article
+# from newspaper import Article
 from newspaper.utils import BeautifulSoup
 from google.cloud import pubsub_v1
-from pandas_gbq import schema
+# from pandas_gbq import schema
 
 """ 
     When run as  main script, this script scrapes the URL passed as arg[0] for news articles. 
@@ -272,10 +270,10 @@ class Tool:
         @Returns  None
 
         """
-
+        dataset_and_table = self.gbq_dataset + self.gbq_table
         try:
             df = pandas.DataFrame.from_dict(articles_gbq, orient='columns')
-            pandas_gbq.to_gbq(df, 'my_dataset.my_table2', chunksize=5, project_id=self.project_id, if_exists="append")
+            pandas_gbq.to_gbq(df, dataset_and_table, chunksize=5, project_id=self.project_id, if_exists="append")
         except Exception as e:
             print(e)
         return

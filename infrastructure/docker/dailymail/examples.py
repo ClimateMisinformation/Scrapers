@@ -11,13 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from scraper import Tool
-from flask import Flask, request, escape
-from google.cloud import pubsub_v1
-from newspaper import Config
-from newspaper import Article
-import pandas
+from flask import Flask, request
+
 """
 This  script  runs a  local server and  exposes two  URLs
 
@@ -45,7 +41,7 @@ def scrapeurls(request=request):
         #            , gbq_table='my_table')
         tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic",
                     gbq_dataset='my_dataset'
-                    , gbq_table='.my_table2')
+                    , gbq_table='my_table2')
         urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url)]
@@ -63,7 +59,7 @@ def publisharticles():
     #tool = Tool('https://www.dailymail.co.uk/', "eng-lightning-244220", "dailymail-urls", gbq_dataset='CollectedURLs'
     #             , gbq_table='my_table')
     tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic", gbq_dataset='my_dataset'
-                , gbq_table='.my_table2')
+                , gbq_table='my_table3')
 
     try:
         tool.subscribe_to_urls_topic()
@@ -72,7 +68,6 @@ def publisharticles():
 
     mydict = tool.collect_articles()
     tool.publish_article_to_bigquery(mydict)
-
 
     return 'Published Articles'
 
