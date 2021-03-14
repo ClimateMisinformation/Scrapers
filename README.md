@@ -54,7 +54,6 @@ If you  are working on an existing issue please assign it to yourself using GitH
 
 To start contributing, follow the steps below
 
-    Fork the repo
     Clone the repo
     Create a branch using git checkout -b feature-branch
     Make the required changes
