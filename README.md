@@ -66,7 +66,7 @@ To start contributing, follow the steps below
     Add a suitable title and description to the pull request and tag the issue number in Pull Request description, if the pull request is related to some issue logged here: Issues
     You're done. Wait for your code to get reviewed and merged.
     
-If you need more information then read the [CONTRIBUTING](https://github.com/ClimateMisinformation/Scrapers/blob/master/docs/CONTRIBUTING.md)  guide.
+If you need more information then read the [CONTRIBUTING](https://github.com/ClimateMisinformation/Scrapers/blob/main/CONTRIBUTING.md)  guide.
 
 ## Git workflow
 We do not yet need to deploy to a production env many times per day so we will use the GitHub flow strategy to merge changes.  It  is described here https://guides.github.com/introduction/flow/. The only GitHub Flow rule is  **Anything in the master branch is deployable**    Each change is reviewed on a feature branch then merged into master. 
