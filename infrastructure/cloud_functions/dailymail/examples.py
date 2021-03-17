@@ -14,7 +14,7 @@
 
 from scraper import Tool
 from flask import Flask, request, escape
-
+import configparser
 """
 This  script  runs a  local server and  exposes two  URLs
 
@@ -25,7 +25,11 @@ http://127.0.0.1:8088/publisharticles  subscribes to publishes
 """
 
 
-def scrapeurls(request=request):
+def scrape_urls(request=request):
+
+    config = configparser.ConfigParser()
+    example_config = config.read("config.ini")["example"]
+
     request_json = request.get_json(silent=True)
     request_args = request.args
 
@@ -40,9 +44,9 @@ def scrapeurls(request=request):
         # tool = Tool(search_url, "eng-lightning-244220", "dailymail-urls",
         #            gbq_dataset='CollectedURLs'
         #            , gbq_table='my_table')
-        tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic",
-                    gbq_dataset='my_dataset'
-                    , gbq_table='my_table2')
+        tool = Tool('https://www.dailymail.co.uk/', example_config['gcp_project'], example_config['topic_name'],
+                    gbq_dataset=example_config['dataset_name'],
+                    gbq_table=example_config['dt_url_name'])
         urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url)]
@@ -55,11 +59,12 @@ def scrapeurls(request=request):
     return 'Scraped URLS'
 
 
-def publisharticles():
+def publish_articles():
     # tool = Tool('https://www.dailymail.co.uk/', "eng-lightning-244220", "dailymail-urls", gbq_dataset='CollectedURLs'
     #             , gbq_table='my_table')
-    tool = Tool('https://www.dailymail.co.uk/', "linux-academy-project-91522", "hello_topic", gbq_dataset='my_dataset'
-                , gbq_table='my_table2')
+    tool = Tool('https://www.dailymail.co.uk/', example_config['gcp_project'], example_config['topic_name'],
+                    gbq_dataset=example_config['dataset_name'],
+                    gbq_table=example_config['dt_article_name'])
 
     try:
         tool.subscribe_to_urls_topic()
@@ -83,6 +88,6 @@ if __name__ == "__main__":
 
 
     # option 2
-    app.add_url_rule('/scrapeurls', 'scrapeurls', scrapeurls, methods=['POST', 'GET'], defaults={'request': request})
-    app.add_url_rule('/publisharticles', 'publisharticles', publisharticles, methods=['POST', 'GET'])
+    app.add_url_rule('/scrape_urls', 'scrape_urls', scrape_urls, methods=['POST', 'GET'], defaults={'request': request})
+    app.add_url_rule('/publish_articles', 'publish_articles', publish_articles, methods=['POST', 'GET'])
     app.run(host='127.0.0.1', port=8088, debug=True)

@@ -13,14 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-import pandas
-import pandas_gbq
 import argparse
+import configparser
+from google.cloud import pubsub_v1
 import os
 import newspaper
 from newspaper import Config
 from newspaper.utils import BeautifulSoup
-from google.cloud import pubsub_v1
+import pandas
+import pandas_gbq
 # from pandas_gbq import schema
 
 """ 
@@ -49,10 +50,12 @@ from google.cloud import pubsub_v1
 
 
 class Tool:
-    def __init__(self, domain_url, project_id=None, gps_topic_id=None, gbq_dataset=None, gbq_table=None, timeout=10):
+
+    def __init__(self, domain_url, project_id=None, gps_topic_id=None, gps_subscription_id=None, gbq_dataset=None, gbq_table=None, timeout=10):
         self.domain_url = domain_url     # The domain to scrape
         self.project_id = project_id     # The google project URL
         self.gps_topic_id = gps_topic_id # The google pub/sub topic id
+        self.gps_subscription_id = gps_subscription_id # The google pub/sub subscription id
         self.gbq_dataset = gbq_dataset   # The google big query dataset
         self.gbq_table = gbq_table       # The  google big query table
         self.timeout = timeout           # The time the subscribe call back runs for
@@ -157,8 +160,8 @@ class Tool:
         # Initialize a Subscriber client
         subscriber_client = pubsub_v1.SubscriberClient()
         # Create a fully qualified identifier in the form of
-        # `projects/{project_id}/subscriptions/{topic_id}-sub`
-        subscription_path = subscriber_client.subscription_path(self.project_id, self.gps_topic_id +'-sub')
+        # `projects/{project_id}/subscriptions/{subscription_id}`
+        subscription_path = subscriber_client.subscription_path(self.project_id, self.gps_subscription_id )
 
         def callback(message):
             # print(f"Received {message}.")
@@ -381,41 +384,44 @@ if __name__ == "__main__":
     """
        create argument parser to receive URL to scrape
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--url",  help="base URL of the news source")
-    args = parser.parse_args()
-    if args.url:
-        search_url = args.url
-    elif os.environ.get('URL_ENV'):
-        search_url = os.environ.get('URL_ENV')
-    else:
-        search_url = 'https://www.dailymail.co.uk/'
-        print("No news source is defined in the script arguments. "
-              "Setting search_url = 'https://www.dailymail.co.uk/' ")
-
-    urls = []
-    filtered_urls = []
-
-    """ Remove output file if it already exists
-    """
-    output_file = '/tmp/output.json'
     try:
-        os.remove(output_file)
-    except OSError as e:
-        print("Error deleting: %s - %s." % (e.filename, e.strerror))
-        pass
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--url",  help="base URL of the news source")
+        args = parser.parse_args()
+        if args.url:
+            search_url = args.url
+        elif os.environ.get('URL_ENV'):
+            search_url = os.environ.get('URL_ENV')
+        else:
+            search_url = 'https://www.dailymail.co.uk/'
+            print("No news source is defined in the script arguments. "
+                  "Setting search_url = 'https://www.dailymail.co.uk/' ")
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        configMain = config["Main"]
+        urls = []
+        filtered_urls = []
 
-    """ Load the  search URL 
-        Create a list of the URLs leading to valid articles 
-    """
-    try:
-        tool = Tool(search_url,"linux-academy-project-91522", "hello_topic-sub")
+        """ Remove output file if it already exists
+        """
+        output_file = '/tmp/output.json'
+
+        if os.path.exists(output_file):
+            os.remove(output_file)
+            """ Load the  search URL 
+                Create a list of the URLs leading to valid articles 
+            """
+
+        tool = Tool(search_url, configMain["project_name"], configMain["subscription_name"])
         urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url)]
-        print(f'After filtering {search_url} there are  { len(filtered_urls) } articles')
+        print(f'After filtering {search_url} there are  {len(filtered_urls)} articles')
+    except OSError as e:
+        print("Error deleting: %s - %s." % (e.filename, e.strerror))
+        pass
     except Exception as e:
-        print(e)
+        print("There was a problem: %s" % e)
 
     article_content = {
             'url': [],

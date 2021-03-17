@@ -6,7 +6,7 @@ chardet==3.0.4
 click==7.1.2
 cloudevents==1.2.0
 colorama==0.4.4
-configparser==5.0.1
+configParser==5.0.1
 crayons==0.4.0
 cssselect==1.1.0
 deprecation==2.1.0
