@@ -50,19 +50,21 @@ from google.cloud import pubsub_v1
 
 class Tool:
     def __init__(self, domain_url, project_id=None, gps_topic_id=None, gbq_dataset=None, gbq_table=None, timeout=10):
-        self.domain_url = domain_url     # The domain to scrape
-        self.project_id = project_id     # The google project URL
-        self.gps_topic_id = gps_topic_id # The google pub/sub topic id
-        self.gbq_dataset = gbq_dataset   # The google big query dataset
-        self.gbq_table = gbq_table       # The  google big query table
-        self.timeout = timeout           # The time the subscribe call back runs for
+        self.domain_url = domain_url      # The domain to scrape
+        self.project_id = project_id      # The google project URL
+        self.gps_topic_id = gps_topic_id  # The google pub/sub topic id
+        self.gbq_dataset = gbq_dataset    # The google big query dataset
+        self.gbq_table = gbq_table        # The  google big query table
+        self.timeout = timeout            # The time the subscribe call back runs for
         self.urls = []
 
     def __repr__(self):
-        return f'Tool("{self.domain_url}", "{self.project_id}", "{self.gps_topic_id}",{self.timeout})'
+        return f'Tool("{self.domain_url}", "{self.project_id}", "{self.gps_topic_id}",  "{self.gbq_dataset}",' \
+               f'"{self.gbq_table}", {self.timeout})'
 
     def __str__(self):
-        return f'({self.domain_url}, {self.project_id}, {self.gps_topic_id},{self.timeout})'
+        return f'({self.domain_url}, {self.project_id}, {self.gps_topic_id}, {self.gbq_dataset},{self.gbq_table},' \
+               f' {self.timeout})'
 
     def collect_urls(self) -> list:
         """
@@ -89,8 +91,8 @@ class Tool:
         try:
             for this_article in paper.articles:
                 current_urls.append(this_article.url)
-        except Exception as e:
-            print(e)
+        except Exception as ex:
+            print(ex)
 
         print(f'The news source at URL {self.domain_url} leads to {len(current_urls)} articles  to scrape')
 
@@ -158,7 +160,7 @@ class Tool:
         subscriber_client = pubsub_v1.SubscriberClient()
         # Create a fully qualified identifier in the form of
         # `projects/{project_id}/subscriptions/{topic_id}-sub`
-        subscription_path = subscriber_client.subscription_path(self.project_id, self.gps_topic_id +'-sub')
+        subscription_path = subscriber_client.subscription_path(self.project_id, self.gps_topic_id + '-sub')
 
         def callback(message):
             # print(f"Received {message}.")
@@ -215,15 +217,15 @@ class Tool:
             try:
                 thearticle = newspaper.Article(url)
                 thearticle.download()
-            except Exception as e:
-                print(e)
+            except Exception as ex:
+                print(ex)
                 continue
 
             try:
                 thearticle.parse()
 
-            except Exception as e:
-                print(e)
+            except Exception as ex:
+                print(ex)
 
             try:
                 articles_content['url'].append(thearticle.url)
@@ -232,11 +234,11 @@ class Tool:
                 articles_content['date'].append(thearticle.publish_date)
                 articles_content['tags'].append('')
                 articles_content['text'].append(thearticle.text.replace("\n", " ").replace(",", " "))
-            except AttributeError as e:
-                print(e)
+            except AttributeError as ex:
+                print(ex)
                 continue
-            except Exception as e:
-                print(e)
+            except Exception as ex:
+                print(ex)
         return articles_content
 
     @staticmethod
@@ -269,8 +271,8 @@ class Tool:
         try:
             df = pandas.DataFrame.from_dict(articles_gbq, orient='columns')
             pandas_gbq.to_gbq(df, dataset_and_table, chunksize=5, project_id=self.project_id, if_exists="append")
-        except Exception as e:
-            print(e)
+        except Exception as ex:
+            print(ex)
         return
 
     def pub(self, content):
@@ -328,12 +330,13 @@ class Tool:
             self.pub(url)
         return
 
+    @staticmethod
     def generate_bq_schema(df, default_type='STRING'):
         """ Given a passed df, generate the associated Google BigQuery schema.
         Parameters
         ----------
-        df : DataFrame
-        default_type : string
+        self.df : DataFrame
+        self.default_type : string
             The default big query type in case the type of the column
             does not exist in the schema.
         """
@@ -360,8 +363,8 @@ if __name__ == "__main__":
 
     """ This script scrapes the  given URL website for  articles and constructs a list 
 
-        If a URL in the list passes the criteria defined by filter_url(), then it is visited and its content extracted using 
-        Beautiful soup.  B. Soup cleans up the inner element text by converting it to UTF8.  
+        If a URL in the list passes the criteria defined by filter_url(), then it is visited and its content extracted 
+        using Beautiful soup.  B. Soup cleans up the inner element text by converting it to UTF8.  
                 
         The data extracted is saved to a dictionary with the structure below
 
@@ -409,7 +412,7 @@ if __name__ == "__main__":
         Create a list of the URLs leading to valid articles 
     """
     try:
-        tool = Tool(search_url,"linux-academy-project-91522", "hello_topic-sub")
+        tool = Tool(search_url, "linux-academy-project-91522", "hello_topic-sub")
         urls = tool.collect_urls()
         filtered_urls = [
             url for url in urls if tool.filter_urls(url)]
