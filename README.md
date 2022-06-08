@@ -1,3 +1,6 @@
+# Archived June 2022 
+We will focus on building bots to detect greenwashing.
+
 # Climate Battle Cards
 
 Description of directories
